@@ -57,54 +57,7 @@ public class Dispatcher {
         int length = 0;
         boolean hasMatched = false;
         TokenType tokenType = null;
-        if (this.consumeWhiteSpace()) {
-            try {
-                String first_char = getNextCharAsString();
-                length += 1;
-                for (String key : FSA.FSAHash.keySet()) {
-                    if (first_char.matches(key)) {
-                        String lexeme = first_char;
-                        while (true) {                            
-                            boolean hasMatchedThisIteration = false;
-                            int count = 0;
-                            for (String hashKey : FSA.FSAHash.get(key).keySet()) {
-                                count++;
-                                if (lexeme.matches(hashKey)) {
-                                    hasMatched = true;
-                                    hasMatchedThisIteration = true;
-                                    tokenType = FSA.FSAHash.get(key).get(hashKey);
-                                } 
-                                if (hasMatched 
-                                        && !hasMatchedThisIteration 
-                                        && count == FSA.FSAHash.get(key).size()) {
-                                    length -= 1;
-                                    lexeme = lexeme.substring(0, lexeme.length()-1);
-                                    this.rewind();
-                                    return new TokenContainer(tokenType, -1, 
-                                        this.rowCount, this.colCount+length,
-                                        length, false);
-                                }
 
-                            }
-                            String s = getNextCharAsString();
-                            if (lexeme.matches("\\s")) {
-                                break;
-                            }
-                            lexeme += s;
-                            length += 1;
-                        }
-                        if (hasMatched) {
-                            this.rewind();
-                            return new TokenContainer(tokenType, -1, 
-                                    this.rowCount, this.colCount+length,
-                                    length, false);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println(e.getLocalizedMessage());
-            }
-        }
         return new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, 0, true);   //placeholder
     }
     

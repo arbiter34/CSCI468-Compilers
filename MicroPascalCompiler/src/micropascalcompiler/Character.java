@@ -10,6 +10,7 @@ public class Character {
 	
 	private static final String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWQYZ";
 	private static final String digits = "0123456789";
+        private static final String whitespaces = " \r\n\t";
 	
 	public static boolean isLetter(char c)
 	{
