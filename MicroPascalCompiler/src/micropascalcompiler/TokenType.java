@@ -16,5 +16,8 @@ public enum TokenType {
 	
 	/* Other */
 	MP_EOF,
+        
+        /* Error */
+        MP_ERROR
 
 }
