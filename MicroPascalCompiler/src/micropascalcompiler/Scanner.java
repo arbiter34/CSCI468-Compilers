@@ -31,7 +31,7 @@ public class Scanner {
 	public void run() {
 		while (true) {
 			TokenContainer t = this.dispatcher.nextToken();
-			if (t.isError()) {
+			if (t.getError()) {
 				break;
 			}
 			char[] buf = new char[255];
