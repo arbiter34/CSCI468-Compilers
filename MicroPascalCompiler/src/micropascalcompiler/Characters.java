@@ -6,11 +6,11 @@ package micropascalcompiler;
  * @author Shane
  *
  */
-public class Character {
+public class Characters {
 	
 	private static final String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWQYZ";
 	private static final String digits = "0123456789";
-        private static final String whitespaces = " \r\n\t";
+    private static final String whitespaces = " \r\n\t";
 	
 	public static boolean isLetter(char c)
 	{
