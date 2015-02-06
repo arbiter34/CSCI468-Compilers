@@ -13,17 +13,17 @@ import micropascalcompiler.TokenContainer;
  *
  * @author arbiter34
  */
-public class DigitFSA extends AbstractFSA {
+public class LiteralFSA extends AbstractFSA {
     
-    protected static DigitFSA instance; 
+    protected static LiteralFSA instance; 
     
-    private DigitFSA(){
+    private LiteralFSA(){
     }
    
     
-    public static DigitFSA getInstance(BufferedReader inFile) {
+    public static LiteralFSA getInstance(BufferedReader inFile) {
         if (instance == null) {
-            instance = new DigitFSA();
+            instance = new LiteralFSA();
         } 
         instance.setBufferedReader(inFile);
         return instance;

@@ -16,8 +16,7 @@ public abstract class AbstractFSA {
     protected BufferedReader inFile;
     protected TokenContainer t;
     
-    protected AbstractFSA(){
-    }
+    protected AbstractFSA(){}
     
     protected void setBufferedReader(BufferedReader inFile) {
         this.inFile = inFile;

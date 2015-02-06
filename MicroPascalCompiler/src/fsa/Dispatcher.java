@@ -60,6 +60,7 @@ public class Dispatcher {
         
         if (consumeWhiteSpace()) {
             AbstractFSA a = getFSA(peek());
+            a.execute();
             TokenContainer t = a.getResult();
         }
         
@@ -82,6 +83,14 @@ public class Dispatcher {
     
     private AbstractFSA getFSA(char c) {
         AbstractFSA a = null;
+        
+        if (Characters.isDigit(c)) {
+            a = DigitFSA.getInstance(inFile);
+        } else if (Characters.isLetter(c)) {
+            
+        }
+            
+        
         
         return a;
     }
