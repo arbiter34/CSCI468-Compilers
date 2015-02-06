@@ -15,7 +15,11 @@ public class MicroPascalCompiler {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        Scanner scanner = new Scanner(args[1]);
+        
+        System.out.println("run completed");
+        
+        
     }
     
 }
