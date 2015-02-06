@@ -70,7 +70,7 @@ public class TokenContainer {
 		this.isError = isError;
 	}
 	
-	public boolean isError()
+	public boolean getError()
 	{
 		return this.isError;
 	}
