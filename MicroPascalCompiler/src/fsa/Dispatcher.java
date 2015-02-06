@@ -57,20 +57,34 @@ public class Dispatcher {
         int length = 0;
         boolean hasMatched = false;
         TokenType tokenType = null;
-
+        
+        if (consumeWhiteSpace()) {
+            AbstractFSA a = getFSA(peek());
+            TokenContainer t = a.getResult();
+        }
+        
+        
         return new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, 0, true);   //placeholder
     }
     
-    private String getNextCharAsString() {
-       String s = null;
-       try {
-           s = java.lang.Character.toString((char)this.inFile.read());
-       } catch (Exception e) {
-           
-       }
-       return s;
+    private char peek() {
+        char c = '\0';
+        try {
+            this.inFile.mark(32);
+            c = (char)this.inFile.read();
+            this.inFile.reset();
+        } catch (Exception e) {
+            
+        }
+        return c;
     }
     
+    
+    private AbstractFSA getFSA(char c) {
+        AbstractFSA a = null;
+        
+        return a;
+    }
     private void markFile() {
         try {
             this.inFile.mark(markLimit);
