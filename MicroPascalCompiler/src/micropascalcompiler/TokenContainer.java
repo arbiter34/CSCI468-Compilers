@@ -69,4 +69,10 @@ public class TokenContainer {
 	public void setError(boolean isError) {
 		this.isError = isError;
 	}
+	
+	public boolean isError()
+	{
+		return this.isError;
+	}
+	
 }
