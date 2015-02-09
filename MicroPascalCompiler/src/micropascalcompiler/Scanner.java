@@ -31,6 +31,9 @@ public class Scanner {
 	public void run() {
 		while (true) {
 			TokenContainer t = this.dispatcher.nextToken();
+                        if (t.getToken() == TokenType.MP_EOF) {
+                            break;
+                        }
 			char[] buf = new char[255];
 			try {
 				this.inFile.read(buf, 0, t.getLength());

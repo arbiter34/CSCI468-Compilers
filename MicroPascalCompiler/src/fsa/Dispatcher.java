@@ -34,15 +34,19 @@ public class Dispatcher {
     
     private boolean consumeWhiteSpace() {
         String c;
+        int charByte;
         try {
             this.inFile.mark(markLimit);
-            while ( (c = java.lang.Character.toString((char)this.inFile.read())).matches("\\s") ) {
+            while ( ((charByte = this.inFile.read()) != -1) && ((c = Character.toString((char)charByte)).matches("\\s")) ) {
                 this.colCount += 1;
                 if (c.matches("\r|\n")) {
                     this.rowCount += 1;
                     this.colCount = 0;
                 }
                 this.inFile.mark(markLimit);
+            }
+            if (charByte == -1) {
+                return false;
             }
             this.inFile.reset();
         } catch (Exception e) {
@@ -66,11 +70,13 @@ public class Dispatcher {
                 t.setRow(this.rowCount);
                 t.setCol(this.colCount);
                 return t;
+            } else {
+                return new TokenContainer(TokenType.MP_ERROR, -1, rowCount, colCount, 1, true); 
             }
-        }
+        } 
         
         
-        return new TokenContainer(TokenType.MP_ERROR, -1, rowCount, colCount, 1, true);   //placeholder
+        return new TokenContainer(TokenType.MP_EOF, -1, rowCount, colCount, 1, true);   //placeholder
     }
     
     private char peek() {
