@@ -99,6 +99,8 @@ public class Dispatcher {
             a = DigitFSA.getInstance(inFile);
         } else if (Characters.isLetter(c)) {
             
+        } else if (c == '{') {
+            a = CommentFSA.getInstance(inFile);
         }
             
         

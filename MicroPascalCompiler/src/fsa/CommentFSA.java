@@ -8,6 +8,7 @@ package fsa;
 import java.io.BufferedReader;
 import micropascalcompiler.Characters;
 import micropascalcompiler.TokenContainer;
+import micropascalcompiler.TokenType;
 
 /**
  *
@@ -32,15 +33,35 @@ public class CommentFSA extends AbstractFSA {
     
     public void run() {
         int length = 0;
-        boolean accept = false;
+        boolean stopFSA = false;
         int state = 0;
         char c;
+        
+        //Init TokenContainer to error
+        t = new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, length, true);
+        
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read())) {
+            while (!Characters.isWhitespace(c = (char)this.inFile.read()) && !stopFSA) {
                 switch (state) {
                     case 0:
+                        if (c == '{') {
+                            length++;
+                            state = 1;
+                        } else {
+                            state = -1;
+                        }
                         break;
                     case 1:
+                        if (c == '}') {
+                            length++;
+                            t.setToken(TokenType.MP_COMMENT);
+                            state = -1;
+                        } else if (c == -1) {
+                            t.setToken(TokenType.MP_RUN_COMMENT);
+                            
+                        } else {
+                            length++;
+                        }
                         break;
                     case 2:
                         break;
@@ -48,11 +69,16 @@ public class CommentFSA extends AbstractFSA {
                         break;
                     case 4:
                         break;
+                    default:
+                        stopFSA = true;
+                        break;
                 }
             }
         } catch (Exception e) {
             
         }
+        this.t.setLength(length);
+        this.t.setError((t.getToken() == TokenType.MP_ERROR));
         
         
     }

@@ -20,7 +20,7 @@ public enum TokenType {
 	MP_TIMES, MP_COLON, 
 	
 	/* Other */
-	MP_EOF,
+	MP_EOF, MP_COMMENT,
         
     /* Error */
     MP_ERROR, MP_RUN_COMMENT, MP_RUN_STRING
