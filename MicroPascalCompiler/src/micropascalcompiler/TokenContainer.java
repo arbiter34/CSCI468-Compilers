@@ -40,39 +40,39 @@ public class TokenContainer {
     
     public int getCol() {
 		return col;
-	}
+    }
 
-	public void setCol(int col) {
-		this.col = col;
-	}
+    public void setCol(int col) {
+            this.col = col;
+    }
 
-	public int getRow() {
-		return row;
-	}
+    public int getRow() {
+            return row;
+    }
 
-	public void setRow(int row) {
-		this.row = row;
-	}
+    public void setRow(int row) {
+            this.row = row;
+    }
 
-	public int getErrorNumber() {
-		return errorNumber;
-	}
+    public int getErrorNumber() {
+            return errorNumber;
+    }
 
-	public void setLength(int length) {
-		this.length = length;
-	}
-	
-	public int getLength() {
-		return this.length;
-	}
+    public void setLength(int length) {
+            this.length = length;
+    }
 
-	public void setError(boolean isError) {
-		this.isError = isError;
-	}
-	
-	public boolean getError()
-	{
-		return this.isError;
-	}
+    public int getLength() {
+            return this.length;
+    }
+
+    public void setError(boolean isError) {
+            this.isError = isError;
+    }
+
+    public boolean getError()
+    {
+            return this.isError;
+    }
 	
 }

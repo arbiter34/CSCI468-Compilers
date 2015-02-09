@@ -60,8 +60,13 @@ public class Dispatcher {
         
         if (consumeWhiteSpace()) {
             AbstractFSA a = getFSA(peek());
-            a.execute();
-            TokenContainer t = a.getResult();
+            if (a != null) {
+                a.execute();
+                TokenContainer t = a.getResult();
+                t.setRow(this.rowCount);
+                t.setLength(this.colCount + t.getLength());
+                return t;
+            }
         }
         
         
