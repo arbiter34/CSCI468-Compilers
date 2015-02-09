@@ -64,13 +64,13 @@ public class Dispatcher {
                 a.execute();
                 TokenContainer t = a.getResult();
                 t.setRow(this.rowCount);
-                t.setLength(this.colCount + t.getLength());
+                t.setCol(this.colCount);
                 return t;
             }
         }
         
         
-        return new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, 0, true);   //placeholder
+        return new TokenContainer(TokenType.MP_ERROR, -1, rowCount, colCount, 1, true);   //placeholder
     }
     
     private char peek() {
