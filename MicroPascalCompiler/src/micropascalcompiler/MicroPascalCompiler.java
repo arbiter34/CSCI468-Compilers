@@ -16,7 +16,7 @@ public class MicroPascalCompiler {
      */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(args[1]);
-        
+        scanner.run();
         System.out.println("run completed");
         
         
