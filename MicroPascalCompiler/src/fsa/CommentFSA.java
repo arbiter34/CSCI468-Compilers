@@ -41,7 +41,8 @@ public class CommentFSA extends AbstractFSA {
         t = new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, length, true);
         
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read()) && !stopFSA) {
+            while (!stopFSA) {
+                c = (char)this.inFile.read();
                 switch (state) {
                     case 0:
                         if (c == '{') {
@@ -62,12 +63,6 @@ public class CommentFSA extends AbstractFSA {
                         } else {
                             length++;
                         }
-                        break;
-                    case 2:
-                        break;
-                    case 3:
-                        break;
-                    case 4:
                         break;
                     default:
                         stopFSA = true;
