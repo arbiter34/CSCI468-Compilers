@@ -57,7 +57,7 @@ public class CommentFSA extends AbstractFSA {
                             length++;
                             t.setToken(TokenType.MP_COMMENT);
                             state = -1;
-                        } else if (c == -1) { // shouldn't we be checking to set if c is == to '{', will c ever be equal to -1?
+                        } else if (c == -1) {
                             t.setToken(TokenType.MP_RUN_COMMENT);
                             
                         } else {
