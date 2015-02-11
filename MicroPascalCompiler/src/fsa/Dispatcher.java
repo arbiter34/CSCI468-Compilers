@@ -95,15 +95,15 @@ public class Dispatcher {
     private AbstractFSA getFSA(char c) {
         AbstractFSA a = null;
         
-//        if (Characters.isDigit(c)) {
-//            a = DigitFSA.getInstance(inFile);
-//        } else 
+        if (Characters.isDigit(c)) {
+            return DigitFSA.getInstance(inFile);
+        } 
         if (Characters.isLetter(c) || c == '$' || c == '_') {
-        	a = AlphaFSA.getInstance(inFile);
+            return AlphaFSA.getInstance(inFile);
         }
-//        else if (c == '{') {
-//            a = CommentFSA.getInstance(inFile);
-//        }
+        if (c == '{') {
+            return CommentFSA.getInstance(inFile);
+        }
             
         
         
