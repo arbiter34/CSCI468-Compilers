@@ -107,6 +107,9 @@ public class Dispatcher {
         if (c == '\'') {
             return LiteralFSA.getInstance(inFile);
         }
+        if (Characters.isSymbol(c)) {
+            return SymbolFSA.getInstance(inFile);
+        }
             
         
         

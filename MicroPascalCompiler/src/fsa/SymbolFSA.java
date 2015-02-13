@@ -6,8 +6,8 @@
 package fsa;
 
 import java.io.BufferedReader;
-import micropascalcompiler.Characters;
 import micropascalcompiler.TokenContainer;
+import micropascalcompiler.TokenType;
 
 /**
  *
@@ -29,30 +29,118 @@ public class SymbolFSA extends AbstractFSA {
         return instance;
     }
     
-    
+    @Override
     public void run() {
         int length = 0;
-        boolean accept = false;
+        boolean stopFSA = false;
         int state = 0;
         char c;
+        
+        //Init TokenContainer to error
+        t = new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, length, true);
+        
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read())) {
+            while (!stopFSA) {
+                c = (char)this.inFile.read();
                 switch (state) {
                     case 0:
+                        if (c == ':') {
+                            t.setToken(TokenType.MP_COLON);
+                            length++;
+                            state = 1;
+                        } else if (c == ',') {
+                            t.setToken(TokenType.MP_COMMA);
+                            length++;
+                            state = -1;
+                        } else if (c == '=') {
+                            t.setToken(TokenType.MP_EQUAL);
+                            length++;
+                            state = -1;
+                        } else if (c == '/') {
+                            t.setToken(TokenType.MP_FLOAT_DIVIDE);
+                            length++;
+                            state = -1;
+                        } else if (c == '>') {
+                            t.setToken(TokenType.MP_GTHAN);
+                            length++;
+                            state = 2;
+                        } else if (c == '<') {
+                            t.setToken(TokenType.MP_LTHAN);
+                            length++;
+                            state = 3;
+                        } else if (c == '(') {
+                            t.setToken(TokenType.MP_LPAREN);
+                            length++;
+                            state = -1;
+                        } else if (c == '-') {
+                            t.setToken(TokenType.MP_MINUS);
+                            length++;
+                            state = -1;
+                        } else if (c == '.') {
+                            t.setToken(TokenType.MP_PERIOD);
+                            length++;
+                            state = -1;
+                        } else if (c == '+') {
+                            t.setToken(TokenType.MP_PLUS);
+                            length++;
+                            state = -1;
+                        } else if (c == ')') {
+                            t.setToken(TokenType.MP_RPAREN);
+                            length++;
+                            state = -1;
+                        } else if (c == ';') {
+                            t.setToken(TokenType.MP_SCOLON);
+                            length++;
+                            state = -1;
+                        } else if (c == '*') {
+                            t.setToken(TokenType.MP_TIMES);
+                            length++;
+                            state = -1;
+                        } else {
+                            state = -1;
+                        }
                         break;
                     case 1:
+                        if (c == '=') {
+                            length++;
+                            t.setToken(TokenType.MP_ASSIGN);
+                            state = -1;
+                        } else {
+                            state = -1;
+                        }
                         break;
                     case 2:
+                        if (c == '=') {
+                            length++;
+                            t.setToken(TokenType.MP_GEQUAL);
+                            state = -1;
+                        } else {
+                            state = -1;
+                        }
                         break;
                     case 3:
+                        if (c == '=') {
+                            length++;
+                            t.setToken(TokenType.MP_LEQUAL);
+                            state = -1;
+                        } else if (c == '>') {
+                            length++;
+                            t.setToken(TokenType.MP_NEQUAL);
+                            state = -1;
+                        } else {
+                            state = -1;
+                        }
                         break;
-                    case 4:
+                    default:
+                        stopFSA = true;
                         break;
                 }
             }
         } catch (Exception e) {
             
         }
+        this.t.setLength(length);
+        this.t.setError((t.getToken() == TokenType.MP_ERROR));
         
         
     }
