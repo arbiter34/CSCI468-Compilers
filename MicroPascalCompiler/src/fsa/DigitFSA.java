@@ -42,7 +42,8 @@ public class DigitFSA extends AbstractFSA {
         char c;
         
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read()) && !stopFSA) {
+            while (!stopFSA) {
+                c = (char)this.inFile.read();
                 switch (state) {
                     case 0:
                         if (Characters.isDigit(c)) {

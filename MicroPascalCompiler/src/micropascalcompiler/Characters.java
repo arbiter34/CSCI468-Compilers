@@ -24,7 +24,7 @@ public class Characters {
 	
 	public static boolean isWhitespace(char c)
 	{
-		return c == ' ' || c == '\t';
+		return whitespaces.contains(""+c);
 	}
 
 }

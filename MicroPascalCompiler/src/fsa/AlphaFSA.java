@@ -8,6 +8,7 @@ package fsa;
 import java.io.BufferedReader;
 
 import micropascalcompiler.Characters;
+import micropascalcompiler.ReservedWords;
 import micropascalcompiler.TokenContainer;
 import micropascalcompiler.TokenType;
 
@@ -34,13 +35,14 @@ public class AlphaFSA extends AbstractFSA {
     
     public void run() {
         int length = 0;
-        boolean accept = false;
+        boolean stopFSA = false;
         int state = 0;
         
         t = new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, length, true);
         char c;
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read())) {
+            while (!stopFSA) {
+                c = (char)this.inFile.read();
                 switch (state) {
                     case 0:
                     	/* Our first character of a variable should be a letter, $, or _ if it is set
@@ -70,6 +72,9 @@ public class AlphaFSA extends AbstractFSA {
                     case 3:
                         break;
                     case 4:
+                        break;
+                    default:
+                        stopFSA = true;
                         break;
                 }
             }
