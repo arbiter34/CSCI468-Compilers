@@ -61,6 +61,16 @@ public class CommentFSA extends AbstractFSA {
                             t.setToken(TokenType.MP_RUN_COMMENT);
                             
                         } else {
+                            if (Characters.isNewLine(c)) {
+                                t.setCol(0);
+                                t.setRow(t.getRow() + 1);
+                            }
+                            if (Characters.isSpace(c)) {
+                                t.setCol(t.getCol() + 1);
+                            }
+                            if (Characters.isTab(c)) {
+                                t.setCol(t.getCol() + 4);
+                            }
                             length++;
                         }
                         break;

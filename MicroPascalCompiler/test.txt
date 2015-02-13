@@ -1,3 +1,16 @@
 if (Stuff = things) then
 	foo := bar;
 a := b * c;
+	var + x := things;
+
+'This is a
+
+really
+
+weird
+string'
+
+{I wonder if the row
+count 
+is correct}
+	Pizza

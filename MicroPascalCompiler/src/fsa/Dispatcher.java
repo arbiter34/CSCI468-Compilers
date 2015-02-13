@@ -18,8 +18,8 @@ public class Dispatcher {
 
     private static final int markLimit = 1024;
     private BufferedReader inFile;
-    private int rowCount = 0;
-    private int colCount = 0;
+    private int rowCount = 1;
+    private int colCount = 1;
     
     public Dispatcher(BufferedReader in) {
         try {
@@ -33,13 +33,19 @@ public class Dispatcher {
     
     
     private boolean consumeWhiteSpace() {
-        String c;
         int charByte;
+        char c;
         try {
             this.inFile.mark(markLimit);
-            while ( ((charByte = this.inFile.read()) != -1) && ((c = Character.toString((char)charByte)).matches("\\s")) ) {
-                this.colCount += 1;
-                if (c.matches("\r|\n")) {
+            while ( ((charByte = this.inFile.read()) != -1) && (Characters.isWhitespace((char)charByte)) ) {
+                c = (char)charByte;
+                if (Characters.isSpace(c)) {
+                    this.colCount++;
+                }
+                if (Characters.isTab(c)) {
+                    this.colCount += 4;
+                }
+                if (Characters.isNewLine(c)) {
                     this.rowCount += 1;
                     this.colCount = 0;
                 }
@@ -67,17 +73,33 @@ public class Dispatcher {
             if (a != null) {
                 a.execute();
                 TokenContainer t = a.getResult();
-                t.setRow(this.rowCount);
+                //We need to grab the column and rows counted by the FSA
+                int countedColumns = t.getCol();
+                int countedRows = t.getRow();
+                
+                //Set the token's col and row to beginning marker
                 t.setCol(this.colCount);
+                t.setRow(this.rowCount);
+                
+                //If the FSA increased row, then it's comment/literal string
+                //Increase row count by rows counted, reset column
+                if (countedRows > 0) {
+                    this.rowCount += countedRows;
+                    this.colCount = countedColumns + 1;
+                } else {
+                    // else advance column marker by token length
+                    this.colCount += t.getLength();
+                }
+                
                 return t;
             } else {
                 return new TokenContainer(TokenType.MP_ERROR, -1, rowCount, colCount, 1, true); 
             }
         } 
         
-        
         return new TokenContainer(TokenType.MP_EOF, -1, rowCount, colCount, 1, true);   //placeholder
     }
+   
     
     private char peek() {
         char c = '\0';

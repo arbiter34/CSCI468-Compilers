@@ -19,8 +19,11 @@ public class MicroPascalCompiler {
         TokenContainer t = null;
         
         while ((t = scanner.getNextToken()).getToken() != TokenType.MP_EOF) {
+            System.out.print("Row: " + t.getRow() + " Col: " + t.getCol() + " ");
             System.out.println("Token: " + t.getToken() + " Lexeme: " + scanner.getLexeme());
         }
+        System.out.print("Row: " + t.getRow() + " Col: " + t.getCol() + " ");
+        System.out.println("Token: " + t.getToken() + " Lexeme: " + scanner.getLexeme());
         
         
     }

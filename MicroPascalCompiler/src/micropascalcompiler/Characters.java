@@ -12,6 +12,7 @@ public class Characters {
     private static final String digits = "0123456789";
     private static final String whitespaces = " \r\n\t";
     private static final String symbols = ":,=/><(-.+);*";
+    private static final String newline = "\r\n";
 
     public static boolean isLetter(char c)
     {
@@ -30,5 +31,17 @@ public class Characters {
     
     public static boolean isSymbol(char c) {
         return symbols.contains(""+c);
+    }
+    
+    public static boolean isNewLine(char c) {
+        return newline.contains(""+c);
+    }
+    
+    public static boolean isSpace(char c) {
+        return c == ' ';
+    }
+    
+    public static boolean isTab(char c) {
+        return c == '\t';
     }
 }

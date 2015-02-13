@@ -33,6 +33,7 @@ public class Scanner {
 	public TokenContainer getNextToken() {
             currentToken = this.dispatcher.nextToken();
             if (currentToken.getToken() == TokenType.MP_EOF) {
+                currentLexeme = "";
                 return currentToken;
             }
             char[] buf = new char[255];
