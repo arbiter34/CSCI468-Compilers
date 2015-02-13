@@ -8,7 +8,6 @@ package fsa;
 import java.io.BufferedReader;
 
 import micropascalcompiler.Characters;
-import micropascalcompiler.ReservedWords;
 import micropascalcompiler.TokenContainer;
 import micropascalcompiler.TokenType;
 
@@ -32,7 +31,7 @@ public class AlphaFSA extends AbstractFSA {
         return instance;
     }
     
-    
+    @Override
     public void run() {
         int length = 0;
         boolean stopFSA = false;

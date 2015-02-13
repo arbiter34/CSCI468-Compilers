@@ -104,6 +104,9 @@ public class Dispatcher {
         if (c == '{') {
             return CommentFSA.getInstance(inFile);
         }
+        if (c == '\'') {
+            return LiteralFSA.getInstance(inFile);
+        }
             
         
         

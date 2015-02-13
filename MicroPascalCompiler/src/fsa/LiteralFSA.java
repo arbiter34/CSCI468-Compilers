@@ -6,8 +6,8 @@
 package fsa;
 
 import java.io.BufferedReader;
-import micropascalcompiler.Characters;
 import micropascalcompiler.TokenContainer;
+import micropascalcompiler.TokenType;
 
 /**
  *
@@ -29,30 +29,50 @@ public class LiteralFSA extends AbstractFSA {
         return instance;
     }
     
-    
+    @Override
     public void run() {
         int length = 0;
-        boolean accept = false;
+        boolean stopFSA = false;
         int state = 0;
         char c;
+        
+        //Init TokenContainer to error
+        t = new TokenContainer(TokenType.MP_ERROR, -1, 0, 0, length, true);
+        
         try {
-            while (!Characters.isWhitespace(c = (char)this.inFile.read())) {
+            while (!stopFSA) {
+                c = (char)this.inFile.read();
                 switch (state) {
                     case 0:
+                        if (c == '\'') {
+                            length++;
+                            state = 1;
+                        } else {
+                            state = -1;
+                        }
                         break;
                     case 1:
+                        if (c == '\'') {
+                            length++;
+                            t.setToken(TokenType.MP_STRING);
+                            state = -1;
+                        } else if (c == -1) {
+                            t.setToken(TokenType.MP_RUN_STRING);
+                            
+                        } else {
+                            length++;
+                        }
                         break;
-                    case 2:
-                        break;
-                    case 3:
-                        break;
-                    case 4:
+                    default:
+                        stopFSA = true;
                         break;
                 }
             }
         } catch (Exception e) {
             
         }
+        this.t.setLength(length);
+        this.t.setError((t.getToken() == TokenType.MP_ERROR));
         
         
     }

@@ -20,3 +20,10 @@ ___$var
 8521e
 845.
 521.325e-45
+
+'Stuff and things'
+
+'What the heck 
+is
+this
+	string?'

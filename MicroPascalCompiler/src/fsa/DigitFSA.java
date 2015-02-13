@@ -30,7 +30,7 @@ public class DigitFSA extends AbstractFSA {
         return instance;
     }
     
-    
+    @Override
     public void run() {
         int length = 0;
         boolean stopFSA = false;
