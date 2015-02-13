@@ -54,8 +54,9 @@ public class ReservedWords {
      * and to return it if it does.  Coincidentally, this is 
      * the exact method used by containsKey.
      */
-    public static TokenType getReservedWord(String key) {
-        return ReservedWordHashTable.get(key);
+    public static TokenType getReservedWord(String keyString) {
+        TokenType t = ReservedWordHashTable.get(keyString);
+            return t;
     }
     
 }

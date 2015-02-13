@@ -1,29 +1,3 @@
-vAr
-var
-5var
-
-_var$
-$_$
-___$var
-
-
-999
-888.999
-<
-<=
-
-8.da
-{
-	
-	comment
-}
-8521e
-845.
-521.325e-45
-
-'Stuff and things'
-
-'What the heck 
-is
-this
-	string?'
+if (Stuff = things) then
+	foo := bar;
+a := b * c;

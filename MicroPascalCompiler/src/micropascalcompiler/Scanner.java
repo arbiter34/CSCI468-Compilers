@@ -18,7 +18,7 @@ public class Scanner {
 	private final Dispatcher dispatcher;
 	private BufferedReader inFile;
         private TokenContainer currentToken;
-        private String currentLexeme;
+        private String currentLexeme = "";
 
 	public Scanner(String fileName) {
 		this.fileName = fileName;
@@ -41,7 +41,11 @@ public class Scanner {
             } catch (Exception e) {
 
             }
-            currentLexeme = new String(buf);
+            //String s = new String(buf); // <-----this screws up the string somehow.
+            currentLexeme = "";
+            for (int i = 0; i < currentToken.getLength(); i++) {
+                currentLexeme += buf[i];
+            }
             if (currentToken.getToken() == TokenType.MP_VAR) {
                 TokenType temp = ReservedWords.getReservedWord(currentLexeme);
                 if (temp != null) {
