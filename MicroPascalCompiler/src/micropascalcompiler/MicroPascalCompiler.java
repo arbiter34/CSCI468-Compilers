@@ -6,6 +6,7 @@
 package micropascalcompiler;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  *
@@ -19,7 +20,7 @@ public class MicroPascalCompiler {
     public static void main(String[] args) {
         Scanner scanner = new Scanner("test.txt");
         try {
-            Parser parser = new Parser(scanner);
+            Parser parser = new Parser(scanner, new PrintWriter("output.txt"));
         } catch (IOException e) {
             System.out.println(e.getLocalizedMessage());
         }

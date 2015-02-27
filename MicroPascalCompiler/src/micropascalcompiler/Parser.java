@@ -15,8 +15,6 @@ public class Parser {
         this.scanner = scanner;
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
-
-
         systemGoal();
         System.out.println("Successfully parsed the program.");
     }
