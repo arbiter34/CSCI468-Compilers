@@ -1,5 +1,4 @@
 program do_stuff;
-var x: Integer;
 
 procedure do_things;
 var
@@ -9,6 +8,22 @@ begin;
 	y := x + 7;
 end;
 
-begin
 
+
+
+function stuff(x: Integer): boolean;
+var
+	test: Float;
+begin;
+	test := 5/7 + (4*2);
+end;
+
+begin
+	if (test) then
+	begin
+		stuff;
+		
+	end
+	else
+		things;
 end.

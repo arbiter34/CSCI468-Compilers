@@ -235,8 +235,9 @@ public class Parser {
     {
         switch (lookAhead.getToken()) {
         case MP_FUNCTION: //14 FunctionDeclaration -> FunctionHeading mp_scolon Block mp_scolon #Destroy
-
+            functionHeading();
             match(TokenType.MP_SCOLON);
+            block();
             match(TokenType.MP_SCOLON);
 
             break;
@@ -274,6 +275,7 @@ public class Parser {
             optionalFormalParameterList();
 
             match(TokenType.MP_COLON);
+            type();
 
             break;
         default:

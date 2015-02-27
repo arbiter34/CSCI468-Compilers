@@ -17,7 +17,7 @@ public class ReservedWords {
     private static HashMap<String, TokenType> ReservedWordHashTable = new HashMap<String, TokenType>() {{
        put("and", TokenType.MP_AND);
         put("begin", TokenType.MP_BEGIN);
-        put("Boolean", TokenType.MP_BOOLEAN);
+        put("boolean", TokenType.MP_BOOLEAN);
         put("div", TokenType.MP_DIV);
         put("do", TokenType.MP_DO);
         put("downto", TokenType.MP_DOWNTO);
