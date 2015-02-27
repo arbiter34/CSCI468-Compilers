@@ -47,7 +47,7 @@ public class Scanner {
             for (int i = 0; i < currentToken.getLength(); i++) {
                 currentLexeme += buf[i];
             }
-            if (currentToken.getToken() == TokenType.MP_VAR) {
+            if (currentToken.getToken() == TokenType.MP_IDENTIFIER) {
                 TokenType temp = ReservedWords.getReservedWord(currentLexeme);
                 if (temp != null) {
                     currentToken.setToken(temp);

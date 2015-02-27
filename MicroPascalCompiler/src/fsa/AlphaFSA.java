@@ -47,7 +47,7 @@ public class AlphaFSA extends AbstractFSA {
                     	/* Our first character of a variable should be a letter, $, or _ if it is set
                     	 * our state to 1 to include digits*/
                     	if(Characters.isLetter(c) || c == '$' || c == '_') {
-                    		this.t.setToken(TokenType.MP_VAR);
+                    		this.t.setToken(TokenType.MP_IDENTIFIER);
                     		state = 1;
                     		length++;
                     	}
