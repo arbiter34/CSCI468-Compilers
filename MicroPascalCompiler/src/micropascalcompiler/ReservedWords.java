@@ -55,7 +55,7 @@ public class ReservedWords {
      * the exact method used by containsKey.
      */
     public static TokenType getReservedWord(String keyString) {
-        TokenType t = ReservedWordHashTable.get(keyString);
+        TokenType t = ReservedWordHashTable.get(keyString.toLowerCase());
             return t;
     }
     

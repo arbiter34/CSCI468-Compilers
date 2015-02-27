@@ -16,7 +16,7 @@ public class Parser {
 
 
         systemGoal();
-        System.out.println("The input program parses!");
+        System.out.println("Successfully parsed the program.");
     }
 
     private void getNextToken() {
@@ -105,7 +105,7 @@ public class Parser {
     public void block()
     {
         switch (lookAhead.getToken()) {
-        case MP_BEGIN: //Fix to allow programs without "var" sections
+        case MP_BEGIN:
         case MP_FUNCTION:
         case MP_PROCEDURE:
         case MP_VAR: //4 Block -> VariableDeclarationPart ProcedureAndFunctionDeclarationPart StatementPart
@@ -113,7 +113,6 @@ public class Parser {
             variableDeclarationPart();
 
             procedureAndFunctionDeclarationPart();
-            //#gen_activation_rec(name_rec, block_type)
             statementPart();
             break;
         default:
@@ -163,7 +162,9 @@ public class Parser {
     {
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER: //8 VariableDeclaration -> IdentifierList mp_colon Type #insert
-
+            identifierList();
+            match(TokenType.MP_COLON);
+            type();
             break;
         default:
             syntaxError("identifier");
@@ -217,11 +218,12 @@ public class Parser {
     {
 
         switch (lookAhead.getToken()) {
-        case MP_PROCEDURE: //13 ProcedureDeclaration -> ProcedureHeading mp_scolon Block mp_scolon #destroy
+        case MP_PROCEDURE: //13 ProcedureDeclaration -> ProcedureHeading mp_scolon Block mp_scolon 
+            
+            procedureHeading();
             match(TokenType.MP_SCOLON);
+            block();
             match(TokenType.MP_SCOLON);
-
-            System.out.println("About to pop procedure table");
 
             break;
         default:
