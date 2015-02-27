@@ -16,19 +16,21 @@ public class Parser {
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
         systemGoal();
+        this.outFile.close();
         System.out.println("Successfully parsed the program.");
     }
     
     private void printNode(int rule, boolean newLine) {
+        this.outFile.flush();
         if (newLine) {
-            this.outFile.printf("%d\n", rule);
+            this.outFile.append(Integer.toString(rule) + "\n");
         } else {
-            this.outFile.printf("%d, ", rule) ;           
+            this.outFile.append(Integer.toString(rule)+ ", ") ;           
         }
     }
     
     private void printBranch() {
-        this.outFile.print(" branch ");
+        //this.outFile.print(" branch ");
     }
 
     private void getNextToken() {
@@ -157,7 +159,7 @@ public class Parser {
         case MP_BEGIN:
         case MP_FUNCTION: 
         case MP_PROCEDURE: //107 VariableDeclarationPart -> lambda
-            this.outFile.print("107\n");
+            printNode(107, true);
             break;
         default:
             syntaxError("var, begin, function, procedure");
@@ -179,7 +181,7 @@ public class Parser {
         case MP_BEGIN:
         case MP_PROCEDURE:
         case MP_FUNCTION: //7 VariableDeclarationTail -> lambda
-            this.outFile.print("7\n");
+            printNode(7, true);
             break;
         default:
             syntaxError("identifier, begin, procedure, function");
@@ -209,19 +211,19 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_INTEGER: //9 Type -> mp_integer
-            this.outFile.print("9\n");
+            printNode(9, true);
             match(TokenType.MP_INTEGER);
             break;
         case MP_BOOLEAN: //110 Type -> mp_boolean
-            this.outFile.print("110\n");
+            printNode(110, true);
             match(TokenType.MP_BOOLEAN);
             break;
         case MP_FLOAT: //108 Type -> mp_float
-            this.outFile.print("108\n");
+            printNode(108, true);
             match(TokenType.MP_FLOAT);
             break;
         case MP_STRING: //109 Type -> mp_string
-            this.outFile.print("109\n");
+            printNode(109, true);
             match(TokenType.MP_STRING);
             break;
         default:
@@ -234,7 +236,7 @@ public class Parser {
         switch (lookAhead.getToken()) {
         case MP_PROCEDURE: //10 ProcedureAndFunctionDeclarationPart -> ProcedureDeclaration ProcedureAndFunctionDeclarationPart
             
-            this.outFile.print("110");
+            printNode(110, false);
             printBranch();
             procedureDeclaration();
             
@@ -243,7 +245,7 @@ public class Parser {
             break;
         case MP_FUNCTION: //11 ProcedureAndFunctionDeclarationPart -> FunctionDeclaration 
             
-            this.outFile.print("11");
+            printNode(11, false);
             printBranch();            
             functionDeclaration();
             
@@ -251,7 +253,7 @@ public class Parser {
             procedureAndFunctionDeclarationPart();
             break;
         case MP_BEGIN: //12 ProcedureAndFunctionDeclarationPart -> lambda
-            this.outFile.print("12\n");
+            printNode(12, true);
             break;
         default:
             syntaxError("procedure, function, begin");
@@ -722,7 +724,7 @@ public class Parser {
     public void relationalOperator() {
         switch (lookAhead.getToken()) {
         case MP_NEQUAL: //76 RelationalOperator -> mp_nequal
-	printNode(76, true);
+            printNode(76, true);
             match(TokenType.MP_NEQUAL);
             break;
         case MP_GEQUAL: //75 RelationalOperator -> mp_gequal
@@ -730,19 +732,19 @@ public class Parser {
             match(TokenType.MP_GEQUAL);
             break;
         case MP_LEQUAL: //74 RelationalOperator -> mp_lequal
-	printNode(74, true);
+            printNode(74, true);
             match(TokenType.MP_LEQUAL);
             break;
         case MP_GTHAN: //73 RelationalOperator -> mp_gthan
-	printNode(73, true);
+            printNode(73, true);
             match(TokenType.MP_GTHAN);
             break;
         case MP_LTHAN: //72 RelationalOperator -> mp_lthan
-	printNode(72, true);
+            printNode(72, true);
             match(TokenType.MP_LTHAN);
             break;
         case MP_EQUAL: //71 RelationalOperator -> mp_equal
-	printNode(71, true);
+            printNode(71, true);
             match(TokenType.MP_EQUAL);
             break;
         default:
@@ -840,14 +842,14 @@ public class Parser {
         case MP_LPAREN:
         case MP_NOT:
         case MP_INTEGER_LIT: //82 OptionalSign -> lambda
-	printNode(82, false);
+            printNode(82, true);
             break;
         case MP_MINUS: //81 OptionalSign -> mp_minus
-	printNode(81, false);
+            printNode(81, true);
             match(TokenType.MP_MINUS);
             break;
         case MP_PLUS: //80 OptionalSign -> mp_plus
-	printNode(80, false);
+            printNode(80, true);
             match(TokenType.MP_PLUS);
             break;
         default:
@@ -858,15 +860,15 @@ public class Parser {
     public void addingOperator() {
         switch (lookAhead.getToken()) {
         case MP_OR: //85 AddingOperator -> mp_or
-	printNode(85, false);
+            printNode(85, true);
             match(TokenType.MP_OR);
             break;
         case MP_MINUS: //84 AddingOperator -> mp_minus
-	printNode(84, false);
+            printNode(84, true);
             match(TokenType.MP_MINUS);
             break;
         case MP_PLUS: //83 AddingOperator -> mp_plus
-	printNode(83, false);
+            printNode(83, true);
             match(TokenType.MP_PLUS);
             break;
         default:
@@ -889,8 +891,11 @@ public class Parser {
         case MP_LPAREN:
         case MP_NOT:
         case MP_INTEGER_LIT: //86 Term -> Factor FactorTail
-	printNode(86, false);
+            printNode(86, false);
+            printBranch();
             factor();
+            
+            printBranch();
             factorTail();
             break;
         default:
@@ -924,16 +929,22 @@ public class Parser {
             case MP_THEN:
             case MP_SCOLON:
             case MP_END: //88 FactorTail -> lambda
-	printNode(88, false);
+                printNode(88, true);
                 break;
             case MP_AND:
             case MP_MOD:
             case MP_DIV:
             case MP_FLOAT_DIVIDE: //added for / vs div division
             case MP_TIMES: //87 FactorTail -> MultiplyingOperator Factor FactorTail
-	printNode(87, false);
+                printNode(87, false);
+                
+                printBranch();
                 multiplyingOperator();
+                
+                printBranch();
                 factor();
+                
+                printBranch();
                 factorTail();
                 break;
             default:
@@ -948,23 +959,23 @@ public class Parser {
     public void multiplyingOperator() {
         switch (lookAhead.getToken()) {
         case MP_AND: //92 MultiplyingOperator -> mp_and
-	printNode(92, false);
+            printNode(92, true);
             match(TokenType.MP_AND);
             break;
         case MP_MOD: //91 MultiplyingOperator -> mp_mod
-	printNode(91, false);
+	printNode(91, true);
             match(TokenType.MP_MOD);
             break;
         case MP_FLOAT_DIVIDE: //112 MultiplyingOperator -> mp_float_divide "/"
-	printNode(112, false);
+	printNode(112, true);
             match(TokenType.MP_FLOAT_DIVIDE);
             break;
         case MP_DIV: //90 MultiplyingOperator -> mp_div "div"
-	printNode(90, false);
+	printNode(90, true);
             match(TokenType.MP_DIV);
             break;
         case MP_TIMES: //89 MultiplyingOperator -> mp_times
-	printNode(89, false);
+	printNode(89, true);
             match(TokenType.MP_TIMES);
             break;
         default:
@@ -981,41 +992,48 @@ public class Parser {
         
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
+            printNode(106, false);
+                
+            printBranch();
             variableIdentifier();
             //functionIdentifier();
-
+            
+            printBranch();
             optionalActualParameterList();
 
             break;
         case MP_LPAREN: //96 Factor -> mp_lparen Expression mp_rparen
-	printNode(96, false);
+            printNode(96, false);
             match(TokenType.MP_LPAREN);
+            printBranch();
             expression();
+            
             match(TokenType.MP_RPAREN);
             break;
         case MP_NOT: //95 Factor -> mp_not Factor
-	printNode(95, false);
+            printNode(95, false);
+            printBranch();
             match(TokenType.MP_NOT);
             factor();
             break;
         case MP_INTEGER_LIT: //93 Factor -> mp_integer_lit
-	printNode(93, false);
+            printNode(93, true);
             match(TokenType.MP_INTEGER_LIT);
             break;
         case MP_FALSE: //116 Factor -> mp_false
-	printNode(116, false);
+            printNode(116, true);
             match(TokenType.MP_FALSE);
             break;
         case MP_TRUE: //115 Factor -> mp_true
-	printNode(115, false);
+            printNode(115, true);
             match(TokenType.MP_TRUE);
             break;
         case MP_STRING_LIT: //114 Factor -> mp_string_lit
-	printNode(114, false);
+            printNode(114, true);
             match(TokenType.MP_STRING_LIT);
             break;
         case MP_FLOAT_LIT: //113 Factor -> mp_float_lit
-	printNode(113, false);
+            printNode(113, true);
             match(TokenType.MP_FLOAT_LIT);
             break;
         default:
@@ -1027,7 +1045,7 @@ public class Parser {
         TokenType t = lookAhead.getToken();
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER: //98 ProgramIdentifier -> mp_identifier
-	printNode(98, false);
+            printNode(98, true);
             match(TokenType.MP_IDENTIFIER);
             break;
         default:
@@ -1038,7 +1056,7 @@ public class Parser {
     public void variableIdentifier() {
         switch (lookAhead.getToken()) {
             case MP_IDENTIFIER: //99 VariableIdentifier -> mp_identifier
-	printNode(99, false);
+                printNode(99, true);
                 match(TokenType.MP_IDENTIFIER);
                 break;
             default:
@@ -1050,7 +1068,7 @@ public class Parser {
     public void procedureIdentifier() {
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER: //100 ProcedureIdentifier -> mp_identifier
-	printNode(100, false);
+            printNode(100, true);
             match(TokenType.MP_IDENTIFIER);
             break;
         default:
@@ -1063,13 +1081,16 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_SCOLON: //19 FormalParameterSectionTail -> mp_scolon FormalParameterSection FormalParameterSectionTail
-	printNode(19, false);
+            printNode(19, false);   
+            printBranch();
             match(TokenType.MP_SCOLON);
             formalParameterSection();
+            
+            printBranch();
             formalParameterSectionTail();
             break;
         case MP_RPAREN: //20 FormalParameterSectionTail -> &epsilon
-	printNode(20, false);
+            printNode(20, true);
             break;
         default:
             syntaxError("function, )");
@@ -1081,11 +1102,13 @@ public class Parser {
         switch (lookAhead.getToken())
         {
             case MP_IDENTIFIER: //21 FormalParameterSection -> ValueParameterSection #insert
-	printNode(21, false);
+                printNode(21, false);
+                printBranch();
                 valueParameterSection();
                 break;
             case MP_VAR: //22 FormalParameterSection -> VariableParameterSection #insert
-	printNode(22, false);
+                printNode(22, false);
+                printBranch();
                 variableParameterSection();
                 break;
             default:
@@ -1098,9 +1121,12 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_IDENTIFIER: //23 ValueParameterSection -> IdentifierList mp_colon Type
-	printNode(23, false);
+            printNode(23, false);
+            printBranch();
             identifierList();
             match(TokenType.MP_COLON);
+            
+            printBranch();
             type();
             break;
         default:
@@ -1114,10 +1140,12 @@ public class Parser {
         switch (lookAhead.getToken())
         {
             case MP_VAR: //24 VariableParameterSection -> mp_var IdentifierList mp_colon Type
-	printNode(24, false);
-
+                printNode(24, false);
+                printBranch();  
                 match(TokenType.MP_VAR);
                 identifierList();
+                
+                printBranch();
                 match(TokenType.MP_COLON);
                 type();
 
@@ -1132,7 +1160,8 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_BEGIN: //25 StatementPart -> CompoundStatement
-	printNode(25, false);
+            printNode(25, false);
+            printBranch();
             compoundStatement();
             break;
         default:
@@ -1145,9 +1174,11 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_BEGIN: //26 CompoundStatement -> mp_begin StatementSequence mp_end
-	printNode(26, false);
+            printNode(26, false);
+            printBranch();
             match(TokenType.MP_BEGIN);
             statementSequence();
+            
             match(TokenType.MP_END);
             break;
         default:
@@ -1190,12 +1221,15 @@ public class Parser {
         case MP_SCOLON: //28 StatementTail -> mp_scolon Statement StatementTail
             printNode(28, false);
             match(TokenType.MP_SCOLON);
+            printBranch();
             statement();
+            
+            printBranch();
             statementTail();
             break;
         case MP_UNTIL: //29 StatementTail -> &epsilon
         case MP_END:
-            printNode(29, false);
+            printNode(29, true);
             break;
         default:
             syntaxError(";, until, end");
@@ -1215,24 +1249,29 @@ public class Parser {
             emptyStatement();
             break;
         case MP_BEGIN: //31 Statement -> CompoundStatement
-	printNode(31, false);
+            printNode(31, false);
+            printBranch();
             compoundStatement();
             break;
         case MP_READ: //32 Statement -> ReadStatement
-	printNode(32, false);
+            printNode(32, false);
+            printBranch();
             readStatement();
             break;
         case MP_WRITELN:
         case MP_WRITE: //33 Statement -> WriteStatement
-	printNode(33, false);
+            printNode(33, false);
+            printBranch();
             writeStatement();
             break;
         case MP_IDENTIFIER:
             if (lookAhead2.getToken() == TokenType.MP_ASSIGN) {
                 printNode(34, false);
+                printBranch();
                 assignmentStatement(); //34 Statement  -> AssigmentStatement
             } else {
                 printNode(39, false);
+                printBranch();
                 procedureStatement();//39 Statement  -> ProcedureStatement
             }
             break;
@@ -1281,10 +1320,13 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_READ: //41 ReadStatement ->  mp_read mp_lparen ReadParameter ReadParameterTail mp_rparen
-	printNode(41, false);
+            printNode(41, false);
             match(TokenType.MP_READ);
             match(TokenType.MP_LPAREN);
+            printBranch();
             readParameter();
+            
+            printBranch();
             readParameterTail();
             match(TokenType.MP_RPAREN);
             break;
@@ -1298,13 +1340,16 @@ public class Parser {
         switch (lookAhead.getToken())
         {
         case MP_COMMA: //42 ReadParameterTail -> mp_comma ReadParameter ReadParameterTail
-	printNode(42, false);
+            printNode(42, false);
             match(TokenType.MP_COMMA);
+            printBranch();
             readParameter();
+            
+            printBranch();
             readParameterTail();
             break;
         case MP_RPAREN: //43 ReadParameterTail -> &epsilon
-	printNode(43, false);
+            printNode(43, true);
             break;
         default:
             syntaxError("Read, )");
@@ -1316,7 +1361,8 @@ public class Parser {
         switch (lookAhead.getToken())
         {
             case MP_IDENTIFIER: //44 ReadParameter -> VariableIdentifier
-	printNode(44, false);
+                printNode(44, false);
+                printBranch();
                 variableIdentifier();
 
                 break;
@@ -1330,19 +1376,25 @@ public class Parser {
         switch (lookAhead.getToken())
         {
             case MP_WRITE: //45 WriteStatement -> mp_write mp_lparen WriteParameter WriteParameterTail mp_rparen
-	printNode(45, false);
+                printNode(45, false);
                 match(TokenType.MP_WRITE);
                 match(TokenType.MP_LPAREN);
+                printBranch();
                 writeParameter();
+                
+                printBranch();
                 writeParameterTail();
 
                 match(TokenType.MP_RPAREN);
                 break;
             case MP_WRITELN: //111 WriteStatement -> mp_writeln mp_lparen WriteParameter WriteParameterTail mp_rparen.
-	printNode(111, false);
+                printNode(111, false);
                 match(TokenType.MP_WRITELN);
                 match(TokenType.MP_LPAREN);
+                printBranch();
                 writeParameter();
+                    
+                printBranch();
                 writeParameterTail();
                 match(TokenType.MP_RPAREN);
                 break;
@@ -1360,9 +1412,12 @@ public class Parser {
         switch (lookAhead.getToken())
         {
             case MP_COMMA: //46 WriteParameterTail -> mp_comma WriteParameter WriteParameterTail
-	printNode(46, false);
+                printNode(46, false);
                 match(TokenType.MP_COMMA);
+                printBranch();
                 writeParameter();
+                    
+                printBranch();
                 writeParameterTail();
                 break;
             case MP_RPAREN: //47 WriteParameterTail -> &epsilon
