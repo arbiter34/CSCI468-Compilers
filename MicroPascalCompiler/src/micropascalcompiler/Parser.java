@@ -638,7 +638,8 @@ public class Parser {
             case MP_INTEGER_LIT:
             case MP_MINUS:
             case MP_PLUS: //67 ActualParameter -> OrdinalExpression
-	printNode(67, false);
+                printNode(67, false);
+                printBranch();
                 ordinalExpression();
 
                 break;
@@ -649,8 +650,6 @@ public class Parser {
 
     /**
      * 
-     * @param formalParam
-     * @return SemanticRec either RecordType.IDENTIFIER or RecordType.LITERAL
      */
     public void expression() {
 
@@ -665,8 +664,11 @@ public class Parser {
             case MP_INTEGER_LIT:
             case MP_MINUS:
             case MP_PLUS: //68 Expression -> SimpleExpression OptionalRelationalPart
-	printNode(68, false);
+                printNode(68, false);
+                printBranch();
                 simpleExpression();
+                        
+                printBranch();
                 optionalRelationalPart();
                 break;
             default:
@@ -693,7 +695,7 @@ public class Parser {
             case MP_THEN:
             case MP_SCOLON:
             case MP_END: //70 OptionalRelationalPart -> lambda
-	printNode(70, false);
+                printNode(70, true);
                 break;
             case MP_NEQUAL:
             case MP_GEQUAL:
@@ -701,8 +703,11 @@ public class Parser {
             case MP_GTHAN:
             case MP_LTHAN:
             case MP_EQUAL: //69 OptionalRelationalPart -> RelationalOperator SimpleExpression
-	printNode(69, false);
+                printNode(69, false);
+                printBranch();
                 relationalOperator();
+                
+                printBranch();
                 simpleExpression();
                 break;
             default:
@@ -717,27 +722,27 @@ public class Parser {
     public void relationalOperator() {
         switch (lookAhead.getToken()) {
         case MP_NEQUAL: //76 RelationalOperator -> mp_nequal
-	printNode(76, false);
+	printNode(76, true);
             match(TokenType.MP_NEQUAL);
             break;
         case MP_GEQUAL: //75 RelationalOperator -> mp_gequal
-	printNode(75, false);
+            printNode(75, true);
             match(TokenType.MP_GEQUAL);
             break;
         case MP_LEQUAL: //74 RelationalOperator -> mp_lequal
-	printNode(74, false);
+	printNode(74, true);
             match(TokenType.MP_LEQUAL);
             break;
         case MP_GTHAN: //73 RelationalOperator -> mp_gthan
-	printNode(73, false);
+	printNode(73, true);
             match(TokenType.MP_GTHAN);
             break;
         case MP_LTHAN: //72 RelationalOperator -> mp_lthan
-	printNode(72, false);
+	printNode(72, true);
             match(TokenType.MP_LTHAN);
             break;
         case MP_EQUAL: //71 RelationalOperator -> mp_equal
-	printNode(71, false);
+	printNode(71, true);
             match(TokenType.MP_EQUAL);
             break;
         default:
@@ -762,10 +767,16 @@ public class Parser {
         case MP_INTEGER_LIT:
         case MP_MINUS:
         case MP_PLUS: //77 SimpleExpression -> OptionalSign Term TermTail
-	printNode(77, false);
+            printNode(77, false);
+            printBranch();
             optionalSign();
+            
+            printBranch();
             term();
+            
+            printBranch();
             termTail();
+            
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -795,15 +806,19 @@ public class Parser {
         case MP_THEN:
         case MP_SCOLON:
         case MP_END: //79 TermTail -> lambda
-	printNode(79, false);
+            printNode(79, true);
             break;
         case MP_OR:
         case MP_MINUS:
         case MP_PLUS: //78 TermTail -> AddingOperator Term TermTail
-	printNode(78, false);
+            printNode(78, false);
+            printBranch();
             addingOperator();
+            
+            printBranch();
             term();
             
+            printBranch();
             termTail();
             break;
         default:
