@@ -53,10 +53,8 @@ public class Scanner {
                     currentToken.setToken(temp);
                 }
             }
+            currentToken.setLexeme(currentLexeme);
             return currentToken;
 	}
-        
-        public String getLexeme() {
-            return this.currentLexeme;
-        }
+
 }

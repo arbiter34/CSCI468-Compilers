@@ -32,3 +32,4 @@ local.properties
 .classpath
 .settings/
 .loadpath
+/UnsafeFileOp/nbproject/private/

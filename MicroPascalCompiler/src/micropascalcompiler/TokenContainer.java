@@ -11,11 +11,20 @@ package micropascalcompiler;
  */
 public class TokenContainer {
     private TokenType token;
+    private String lexeme;
     private int errorNumber;
     private int col;
     private int row;
     private int length;
     private boolean isError;
+
+    public String getLexeme() {
+        return lexeme;
+    }
+
+    public void setLexeme(String lexeme) {
+        this.lexeme = lexeme;
+    }
 
 	public TokenContainer(TokenType token, int errorNumber, int row, int col, int length, boolean isError) {
         this.token = token;

@@ -5,6 +5,8 @@
  */
 package micropascalcompiler;
 
+import java.io.IOException;
+
 /**
  *
  * @author arbiter34
@@ -16,14 +18,13 @@ public class MicroPascalCompiler {
      */
     public static void main(String[] args) {
         Scanner scanner = new Scanner("test.txt");
-        TokenContainer t = null;
-        
-        while ((t = scanner.getNextToken()).getToken() != TokenType.MP_EOF) {
-            System.out.print("Row: " + t.getRow() + " Col: " + t.getCol() + " ");
-            System.out.println("Token: " + t.getToken() + " Lexeme: " + scanner.getLexeme());
+        try {
+            Parser parser = new Parser(scanner);
+        } catch (IOException e) {
+            System.out.println(e.getLocalizedMessage());
         }
-        System.out.print("Row: " + t.getRow() + " Col: " + t.getCol() + " ");
-        System.out.println("Token: " + t.getToken() + " Lexeme: " + scanner.getLexeme());
+        
+        System.out.println("Done!");
         
         
     }

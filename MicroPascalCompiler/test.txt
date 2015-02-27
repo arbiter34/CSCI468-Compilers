@@ -1,18 +1,13 @@
-read(things == somethings) {
-}
-if (Stuff = things) then
-	foo := bar;
-a := b * c;
-	var + x := things;
+program do_stuff;
 
-'This is a
+var x: Integer;
 
-really
+procedure do_things;
+var
+	y: integer;
+begin;
+	x := 5+6;
+	y := x + 7;
+end;
 
-weird
-string'
-
-{I wonder if the row
-count 
-is correct}
-	Pizza
+end.
