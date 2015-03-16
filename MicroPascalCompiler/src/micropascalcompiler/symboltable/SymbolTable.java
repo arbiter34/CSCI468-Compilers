@@ -16,6 +16,18 @@ public class SymbolTable {
     private HashMap<String, SymbolTableRecord> symbolTable;
     
     private int nestingLevel;
+    
+    private String label;
+    
+    public SymbolTable(int nestingLevel, String label) {
+        symbolTable = new HashMap<>();
+        this.nestingLevel = nestingLevel;
+        this.label = label;
+    }
+    
+    public boolean exists(String key) {
+        return this.symbolTable.containsKey(key);
+    }
 
     public int getNestingLevel() {
         return nestingLevel;
@@ -25,12 +37,8 @@ public class SymbolTable {
         return label;
     }
     
-    private String label;
-    
-    public SymbolTable(int nestingLevel, String label) {
-        symbolTable = new HashMap<>();
-        this.nestingLevel = nestingLevel;
-        this.label = label;
+    public SymbolTableRecord getRecord(String key) {
+        return this.symbolTable.get(key);
     }
     
     public RecordKind getRecordKind(String key) {

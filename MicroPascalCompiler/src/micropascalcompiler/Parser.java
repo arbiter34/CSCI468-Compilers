@@ -2,13 +2,17 @@ package micropascalcompiler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Stack;
+import micropascalcompiler.symboltable.*;
 
 public class Parser {
     private static final boolean DEBUG = false;
-    PrintWriter outFile;
-    TokenContainer lookAhead;
-    TokenContainer lookAhead2;
-    Scanner scanner;
+    private final PrintWriter outFile;
+    private TokenContainer lookAhead;
+    private TokenContainer lookAhead2;
+    private final Scanner scanner;
+    private final Stack<SymbolTable> symbolTableStack = new Stack<SymbolTable>();
+    private int nestingLevel = 0;
 
     public Parser(Scanner scanner, PrintWriter outFile) throws IOException {
         this.outFile = outFile;
@@ -109,6 +113,8 @@ public class Parser {
         switch (lookAhead.getToken()) {
         case MP_PROGRAM: //3 ProgramHeading -> mp_program ProgramIdentifier
             printNode(3, false);
+            symbolTableStack.push(new SymbolTable(nestingLevel, "L1"));
+            nestingLevel++;
             match(TokenType.MP_PROGRAM);
             printBranch();
             programIdentifier();
