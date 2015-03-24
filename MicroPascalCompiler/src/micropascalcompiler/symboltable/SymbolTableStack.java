@@ -36,10 +36,16 @@ public class SymbolTableStack {
     }
     
     public boolean symbolExistsInLocalScope(String symbol) {
+        if (stack.empty()) {
+            return false;
+        }
         return stack.peek().exists(symbol);
     }
     
     public boolean scopeExists(String scopeName) {
+        if (stack.empty()) {
+            return false;
+        }
         int depth = stack.indexOf(stack.peek());
         for (int i = depth; i >= 0; i--) {
            if (stack.get(i).getScopeName().equalsIgnoreCase(scopeName)) {
@@ -50,6 +56,9 @@ public class SymbolTableStack {
     }
     
     public SymbolTableRecord getSymbolInScope(String symbol) {
+        if (stack.empty()) {
+            return null;
+        }
         int depth = stack.indexOf(stack.peek());
         for (int i = depth; i >= 0; i--) {
            if (stack.get(i).exists(symbol)) {

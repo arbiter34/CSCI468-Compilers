@@ -22,6 +22,7 @@ public class Parser {
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
         systemGoal();
+        printSymbolTables();
         this.outFile.close();
         System.out.println("Successfully parsed the program.");
     }
@@ -376,8 +377,10 @@ public class Parser {
             
             symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId, null, RecordKind.PROCEDURE, null, params));            
             addSymbolTable(procId, LabelMaker.getNextLabel());
-            for (RecordParameter p: params) {
-                symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
+            if (params != null) {
+                for (RecordParameter p: params) {
+                    symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
+                }
             }
 
             break;
@@ -408,8 +411,10 @@ public class Parser {
             RecordType t = type();
             symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId, t, RecordKind.FUNCTION, null, params));
             addSymbolTable(funcId, LabelMaker.getNextLabel());
-            for (RecordParameter p: params) {
-                symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
+            if (params != null) {
+                for (RecordParameter p: params) {
+                    symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
+                }
             }
             break;
         default:
