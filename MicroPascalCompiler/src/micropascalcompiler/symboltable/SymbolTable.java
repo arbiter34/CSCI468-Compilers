@@ -35,9 +35,10 @@ public class SymbolTable {
         System.out.println("\nLexeme   Type    Kind    Mode    Size    Parameters    Offset");
         for (String key : symbolTable.keySet()) {
            SymbolTableRecord r = symbolTable.get(key);
-           System.out.println(r.getLexeme() + " " + r.getType() + " " + 
-                   r.getKind() + " " + r.getMode() + " " + r.getMode() + 
-                   " " + r.getSize() + " " + r.getParameters() + " " + r.getOffset());
+           int numParams = r.getParameters() == null ? 0 : r.getParameters().size();
+           System.out.println(r.getLexeme() + "\t" + r.getType() + "\t" + 
+                   r.getKind() + "\t" + r.getMode() + 
+                   "\t" + r.getSize() + "\t" + numParams + "\t" + r.getOffset());
         }
         System.out.print("\n\n");
     }
