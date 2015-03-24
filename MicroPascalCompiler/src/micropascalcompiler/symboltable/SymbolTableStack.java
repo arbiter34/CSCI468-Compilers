@@ -32,7 +32,12 @@ public class SymbolTableStack {
     public void print() {
         for (SymbolTable st : stack) {
             st.print();
+            System.out.println("");
         }
+    }
+    
+    public void printCurrentTable() {
+        stack.peek().print();
     }
     
     public boolean symbolExistsInLocalScope(String symbol) {

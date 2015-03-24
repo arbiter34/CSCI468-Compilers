@@ -30,12 +30,16 @@ public class SymbolTable {
     }
     
     public void print() {
+        System.out.println("\n\nScope Name    Nesting Level    Label");
+        System.out.println(this.scopeName + "           " + this.nestingLevel + "            " + this.label);
+        System.out.println("\nLexeme   Type    Kind    Mode    Size    Parameters    Offset");
         for (String key : symbolTable.keySet()) {
            SymbolTableRecord r = symbolTable.get(key);
-           System.out.println(r.getKind() + " " + r.getLexeme() + " " + 
-                   r.getClass() + " " + r.getMode() + " " + r.getOffset() + 
-                   " " + r.getSize() + " " + r.getType());
+           System.out.println(r.getLexeme() + " " + r.getType() + " " + 
+                   r.getKind() + " " + r.getMode() + " " + r.getMode() + 
+                   " " + r.getSize() + " " + r.getParameters() + " " + r.getOffset());
         }
+        System.out.print("\n\n");
     }
 
     public void insert(SymbolTableRecord rec) {

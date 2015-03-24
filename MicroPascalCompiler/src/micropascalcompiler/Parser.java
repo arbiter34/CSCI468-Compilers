@@ -90,6 +90,7 @@ public class Parser {
     }
     
     private void removeSymbolTable() {
+        symbolTableStack.printCurrentTable();
         symbolTableStack.removeSymbolTable();
     }
     
