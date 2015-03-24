@@ -10,5 +10,9 @@ package micropascalcompiler.symboltable;
  * @author arbiter34
  */
 public enum RecordKind {
+    VARIABLE,
     
+    PROCEDURE,
+    
+    FUNCTION
 }

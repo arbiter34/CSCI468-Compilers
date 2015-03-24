@@ -10,5 +10,7 @@ package micropascalcompiler.symboltable;
  * @author arbiter34
  */
 public enum RecordMode {
+    VALUE,
     
+    VARIABLE
 }

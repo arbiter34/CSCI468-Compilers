@@ -13,6 +13,24 @@ import java.util.ArrayList;
  */
 public class SymbolTableRecord {
     private String lexeme;
+    private RecordType type;
+    private RecordKind kind;
+    private RecordMode mode;
+    private int size;
+    private ArrayList<RecordParameter> parameters;
+    private long offset;
+    
+    public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters) {
+        this.lexeme = lexeme;
+        this.type = type;
+        this.kind = kind;
+        this.mode = mode;
+        this.parameters = parameters;
+        
+        
+        this.offset = 0;
+        this.size = 0;
+    }
 
     public String getLexeme() {
         return lexeme;
@@ -69,10 +87,4 @@ public class SymbolTableRecord {
     public void setOffset(long offset) {
         this.offset = offset;
     }
-    private RecordType type;
-    private RecordKind kind;
-    private RecordMode mode;
-    private int size;
-    private ArrayList<RecordParameter> parameters;
-    private long offset;
 }

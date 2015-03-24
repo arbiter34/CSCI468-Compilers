@@ -7,6 +7,7 @@ package micropascalcompiler.symboltable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *
@@ -19,10 +20,34 @@ public class SymbolTable {
     
     private String label;
     
-    public SymbolTable(int nestingLevel, String label) {
+    private String scopeName;
+    
+    public SymbolTable(String scopeName, String label, int nestingLevel) {
         symbolTable = new HashMap<>();
         this.nestingLevel = nestingLevel;
         this.label = label;
+        this.scopeName = scopeName;
+    }
+    
+    public void print() {
+        for (String key : symbolTable.keySet()) {
+           SymbolTableRecord r = symbolTable.get(key);
+           System.out.println(r.getKind() + " " + r.getLexeme() + " " + 
+                   r.getClass() + " " + r.getMode() + " " + r.getOffset() + 
+                   " " + r.getSize() + " " + r.getType());
+        }
+    }
+
+    public void insert(SymbolTableRecord rec) {
+        symbolTable.put(rec.getLexeme(), rec);
+    }
+    
+    public String getScopeName() {
+        return scopeName;
+    }
+
+    public void setScopeName(String scopeName) {
+        this.scopeName = scopeName;
     }
     
     public boolean exists(String key) {

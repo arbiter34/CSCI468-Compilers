@@ -7,10 +7,9 @@ package micropascalcompiler.symboltable;
 
 /**
  *
- * @author arbiter34
+ * @author alperst
  */
-public enum RecordType {
-
+public enum Type {
     INTEGER,
     FLOAT,
     BOOLEAN,
