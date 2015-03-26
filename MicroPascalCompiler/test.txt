@@ -11,9 +11,10 @@ end;
 
 
 
-function stuff(x: Integer): boolean;
+function stuff(x: Integer; y: String): boolean;
 var
-	test: Float;
+    test: Float;
+    test2: String;    
 begin;
 	test := 5/7 + (4*2);
 end;

@@ -8,6 +8,7 @@ package micropascalcompiler.symboltable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -22,11 +23,14 @@ public class SymbolTable {
     
     private String scopeName;
     
+    private long tableSize;
+    
     public SymbolTable(String scopeName, String label, int nestingLevel) {
         symbolTable = new HashMap<>();
         this.nestingLevel = nestingLevel;
         this.label = label;
         this.scopeName = scopeName;
+        this.tableSize = 0;
     }
     
     public void print() {
@@ -44,6 +48,17 @@ public class SymbolTable {
     }
 
     public void insert(SymbolTableRecord rec) {
+        
+        rec.setOffset(this.tableSize);
+        long recDataSize;
+        if (rec.getKind() == RecordKind.VARIABLE) {
+            recDataSize = DataSize.size[rec.getType().ordinal()];
+        } else if (rec.getKind() == RecordKind.FUNCTION || rec.getKind() == RecordKind.PROCEDURE) {
+            recDataSize = DataSize.size[RecordType.PROCEDURE.ordinal()];
+        } else {
+            recDataSize = 0;
+        }
+        this.tableSize += recDataSize;
         symbolTable.put(rec.getLexeme(), rec);
     }
     

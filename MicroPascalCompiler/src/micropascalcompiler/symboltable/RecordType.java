@@ -14,5 +14,8 @@ public enum RecordType {
     INTEGER,
     FLOAT,
     BOOLEAN,
-    STRING
+    STRING,
+    CHARACTER,
+    PROCEDURE,
+    FUNCTION
 }
