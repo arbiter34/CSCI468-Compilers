@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Stack;
 import micropascalcompiler.symboltable.*;
 import micropascalcompiler.labelmaker.*;
+import micropascalcompiler.semanticanalyzer.SemanticAnalyzer;
 
 public class Parser {
     private static final boolean DEBUG = false;
@@ -15,10 +16,12 @@ public class Parser {
     private TokenContainer lookAhead2;
     private final Scanner scanner;
     private final SymbolTableStack symbolTableStack = new SymbolTableStack();
+    private final SemanticAnalyzer analyzer;
 
     public Parser(Scanner scanner, PrintWriter outFile) throws IOException {
         this.outFile = outFile;
         this.scanner = scanner;
+        this.analyzer = new SemanticAnalyzer(symbolTableStack, "output");
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
         systemGoal();
@@ -181,7 +184,7 @@ public class Parser {
             
             printBranch();
             procedureAndFunctionDeclarationPart();
-            
+            analyzer.gen_activation_rec();
             printBranch();
             statementPart();
             break;
@@ -330,7 +333,7 @@ public class Parser {
             
             printBranch();
             
-            String branchLabel = LabelMaker.getNextLabel();
+            String branchLabel = LabelMaker.getCurrentLabel();
             block(branchLabel);
             
             match(TokenType.MP_SCOLON);
@@ -351,7 +354,7 @@ public class Parser {
             match(TokenType.MP_SCOLON);
             
             printBranch();
-            String branchLabel = LabelMaker.getNextLabel();
+            String branchLabel = LabelMaker.getCurrentLabel();
             block(branchLabel);
             match(TokenType.MP_SCOLON);
             removeSymbolTable();
@@ -411,7 +414,7 @@ public class Parser {
             printBranch();
             RecordType t = type();
             symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId, t, RecordKind.FUNCTION, null, params));
-            addSymbolTable(funcId, LabelMaker.getNextLabel());
+            addSymbolTable(funcId, LabelMaker.getCurrentLabel());
             if (params != null) {
                 for (RecordParameter p: params) {
                     symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));

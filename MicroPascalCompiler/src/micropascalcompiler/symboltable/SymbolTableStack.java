@@ -36,6 +36,10 @@ public class SymbolTableStack {
         }
     }
     
+    public SymbolTable getCurrentTable() {
+        return stack.peek();
+    }
+    
     public void printCurrentTable() {
         stack.peek().print();
     }

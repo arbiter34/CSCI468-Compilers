@@ -6,16 +6,14 @@
 package micropascalcompiler.symboltable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedHashMap;
 
 /**
  *
  * @author arbiter34
  */
 public class SymbolTable {
-    private HashMap<String, SymbolTableRecord> symbolTable;
+    private LinkedHashMap<String, SymbolTableRecord> symbolTable;
     
     private int nestingLevel;
     
@@ -25,12 +23,18 @@ public class SymbolTable {
     
     private long tableSize;
     
+    private int parameterCount;
+    
+    private int variableCount;
+    
     public SymbolTable(String scopeName, String label, int nestingLevel) {
-        symbolTable = new HashMap<>();
+        symbolTable = new LinkedHashMap<>();
         this.nestingLevel = nestingLevel;
         this.label = label;
         this.scopeName = scopeName;
         this.tableSize = 0;
+        this.variableCount = 0;
+        this.parameterCount = 0;
     }
     
     public void print() {
@@ -53,8 +57,13 @@ public class SymbolTable {
         long recDataSize;
         if (rec.getKind() == RecordKind.VARIABLE) {
             recDataSize = DataSize.size[rec.getType().ordinal()];
+            if (rec.getMode() == null) {
+                this.variableCount++;
+            } else {
+                this.parameterCount++;
+            }
         } else if (rec.getKind() == RecordKind.FUNCTION || rec.getKind() == RecordKind.PROCEDURE) {
-            recDataSize = DataSize.size[RecordType.PROCEDURE.ordinal()];
+            recDataSize = DataSize.size[4];
         } else {
             recDataSize = 0;
         }
@@ -112,5 +121,13 @@ public class SymbolTable {
     
     public long getRecordOffset(String key) {
         return this.symbolTable.get(key).getOffset();
+    }
+    
+    public int getVariableCount() {
+        return this.variableCount;
+    }
+    
+    public int getParameterCount() {
+        return  this.parameterCount;
     }
 }

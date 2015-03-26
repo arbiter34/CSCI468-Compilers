@@ -11,13 +11,11 @@ package micropascalcompiler.symboltable;
  */
 public class DataSize {
     public static int size[] = {
-        4,      //RecordType.INTEGER
-        8,      //RecordType.FLOAT
+        1,      //RecordType.INTEGER
+        1,      //RecordType.FLOAT
         1,      //RecordType.BOOLEAN
-        4,      //RecordType.STRING
-        1,      //RecordType.CHARACTER
-        4,      //RecordType.PROCEDURE
-        4,      //RecordType.FUNCTION
+        1,      //RecordType.STRING
+        1       //Procedure/Function
         
     };
 }

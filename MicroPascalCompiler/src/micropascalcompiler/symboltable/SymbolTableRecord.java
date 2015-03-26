@@ -31,6 +31,18 @@ public class SymbolTableRecord {
         this.offset = 0;
         this.size = 0;
     }
+    
+    public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters, String label) {
+        this.lexeme = lexeme;
+        this.type = type;
+        this.kind = kind;
+        this.mode = mode;
+        this.parameters = parameters;
+        
+        
+        this.offset = 0;
+        this.size = 0;
+    }
 
     public String getLexeme() {
         return lexeme;
