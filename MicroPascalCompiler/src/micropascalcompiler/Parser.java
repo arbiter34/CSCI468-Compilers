@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import micropascalcompiler.symboltable.*;
 import micropascalcompiler.labelmaker.*;
 import micropascalcompiler.semanticanalyzer.SemanticAnalyzer;
@@ -21,7 +20,7 @@ public class Parser {
     public Parser(Scanner scanner, PrintWriter outFile) throws IOException {
         this.outFile = outFile;
         this.scanner = scanner;
-        this.analyzer = new SemanticAnalyzer(symbolTableStack, "output");
+        this.analyzer = new SemanticAnalyzer(symbolTableStack, "output.asm");
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
         systemGoal();
@@ -187,6 +186,7 @@ public class Parser {
             analyzer.gen_activation_rec();
             printBranch();
             statementPart();
+            analyzer.gen_deactivation_rec();
             break;
         default:
             syntaxError("var, begin, function, procedure");

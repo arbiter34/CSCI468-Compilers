@@ -5,8 +5,8 @@
  */
 package micropascalcompiler.semanticanalyzer;
 
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import micropascalcompiler.Parser;
 import micropascalcompiler.symboltable.SymbolTable;
 import micropascalcompiler.symboltable.SymbolTableStack;
 
@@ -21,7 +21,7 @@ public class SemanticAnalyzer {
     public SemanticAnalyzer(SymbolTableStack stack, String fileName) {
         this.symbolTableStack = stack;
         try {
-            out = new PrintWriter(fileName);
+            out = new PrintWriter(new FileOutputStream(fileName), true);
         } catch(Exception e) {
             System.out.println("Whoops! Couldn't open output file.");
             System.exit(1);
@@ -332,11 +332,6 @@ public class SemanticAnalyzer {
         
     }
 
-    /**
-     * 
-     * @param name_rec
-     *            {@link SemanticRec} from {@link compiler.parser.Parser#program()} with {@link RecordType#SYM_TBL}
-     */
     public void gen_deactivation_rec()
     {
         SymbolTable tbl = symbolTableStack.getCurrentTable();
