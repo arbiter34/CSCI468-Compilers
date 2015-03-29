@@ -1,0 +1,15 @@
+	; do_things start
+add SP #1 SP
+mov D1 -3(SP)
+sub SP #3 D1
+	; activation end
+	; stuff start
+add SP #1 SP
+mov D1 -4(SP)
+sub SP #4 D1
+	; activation end
+	; do_stuff start
+add SP #0 SP
+mov D0 -2(SP)
+sub SP #2 D0
+	; activation end
