@@ -11,7 +11,7 @@ end;
 
 
 
-functio stuff(x: Integer): boolean;
+function stuff(x: Integer): boolean;
 var
 	test: Float;
 begin;
