@@ -54,6 +54,7 @@ public class Scanner {
                 }
             }
             currentToken.setLexeme(currentLexeme);
+            //System.out.println("Type: " + currentToken.getToken() + " \nLexeme: " + currentToken.getLexeme() + " \nRow: " + currentToken.getRow() + " \nCol: " + currentToken.getCol());
             return currentToken;
 	}
 
