@@ -345,6 +345,10 @@ public class SemanticAnalyzer {
         ret();
         comment(tbl.getScopeName() + " end"); //; Program1 end
     }
+    
+    public void gen_branch_false(String label) {
+        branchFalse(label);
+    }
 
 
     /**

@@ -1,0 +1,24 @@
+  MOV SP D0
+  ADD SP #2 SP
+  RD 0(D0)
+  PUSH 0(D0)
+  PUSH #0
+  CMPGTS
+  BRFS L1
+  PUSH 0(D0)
+  PUSH #5
+  MULS
+  POP 1(D0)
+  PUSH 1(D0)
+  WRTS
+  BR L2
+L1:
+  PUSH 0(D0)
+  PUSH #7
+  MULS
+  POP 1(D0)
+  PUSH 1(D0)
+  WRTS
+L2:
+  MOV D0 SP
+  HLT

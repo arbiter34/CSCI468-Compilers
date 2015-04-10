@@ -466,7 +466,7 @@ public class Parser {
             printBranch();
             match(TokenType.MP_THEN);
             statement();
-            
+            analyzer.gen_branch_false(LabelMaker.getNextLabel());
             printBranch();
             optionalElsePart();
             break;
