@@ -14,6 +14,13 @@ import java.util.Stack;
 public class SymbolTableStack {
     private Stack<SymbolTable> stack = null;
     private int nestingLevel = 0;
+    private int previousRecordNestingLevel = -1;
+
+    public int getPreviousRecordNestingLevel() {
+        int ret = previousRecordNestingLevel;
+        previousRecordNestingLevel = -1;
+        return ret;
+    }
     
     public SymbolTableStack() {
         stack = new Stack<SymbolTable>();
@@ -71,6 +78,7 @@ public class SymbolTableStack {
         int depth = stack.indexOf(stack.peek());
         for (int i = depth; i >= 0; i--) {
            if (stack.get(i).exists(symbol)) {
+               previousRecordNestingLevel = stack.get(i).getNestingLevel();
                return stack.get(i).getRecord(symbol);
            } 
         }

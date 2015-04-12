@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import micropascalcompiler.symboltable.SymbolTable;
 import micropascalcompiler.symboltable.SymbolTableStack;
+import micropascalcompiler.TokenType;
+import micropascalcompiler.symboltable.*;
 
 /**
  *
@@ -348,6 +350,83 @@ public class SemanticAnalyzer {
     
     public void gen_branch_false(String label) {
         branchFalse(label);
+    }
+    
+    public void gen_mul_op(TokenType t, RecordType r) {
+        switch (t) {
+            case MP_AND:
+                and();
+                break;
+                
+            case MP_MOD:
+                if (r == RecordType.FLOAT) {
+                    modStackF();
+                } else {
+                    modStackI();
+                }
+                break;
+             
+            case MP_FLOAT_DIVIDE:
+                divStackF();
+                break;
+                
+                
+            case MP_DIV:
+                divStackI();
+                break;
+                
+                
+            case MP_TIMES:
+                if (r == RecordType.FLOAT) {
+                    mulStackF();
+                } else {
+                    mulStackI();
+                }
+                break;
+            
+            default:
+                //semanticError("");
+        }
+    }
+    
+    public void gen_add_op(TokenType t, RecordType r) {
+        switch (t) {
+            case MP_OR: //85 AddingOperator -> mp_or
+                or();
+                break;
+            case MP_MINUS: //84 AddingOperator -> mp_minus
+                if (r == RecordType.FLOAT) {
+                    subStackF();
+                } else {
+                    subStackI();
+                }
+                break;
+            case MP_PLUS: //83 AddingOperator -> mp_plus
+                if (r == RecordType.FLOAT) {
+                    addStackF();
+                } else {
+                    addStackI();
+                }
+                break;
+            default:
+                
+        }
+    }
+    
+    public String getNestingLevelString(int nestingLevel) {
+        return "(" + Integer.toString(nestingLevel) + ")";
+    }
+    
+    public void gen_id_push(long offset, int nestingLevel) {
+        push(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    }
+    
+    public void gen_id_pop(long offset, int nestingLevel) {
+        pop(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    }
+    
+    public void gen_lit_push(String value) {
+        push("#" + value);
     }
 
 

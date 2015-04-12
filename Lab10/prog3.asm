@@ -7,10 +7,10 @@ L1:
    PUSH 1(D0)
    PUSH 2(D0)
    CMPLES
-   BRFS L2
    PUSH 1(D0)
    PUSH #100
    CMPGTS
+   ORS
    BRFS L2
    PUSH 0(D0)
    PUSH 1(D0)
@@ -21,9 +21,9 @@ L1:
    ADDS
    POP 1(D0)
    PUSH 1(D0)
-   WRTS
+   WRTLNS
    PUSH 0(D0)
-   WRTS
+   WRTLNS
    BR L1
 L2:
   MOV D0 SP

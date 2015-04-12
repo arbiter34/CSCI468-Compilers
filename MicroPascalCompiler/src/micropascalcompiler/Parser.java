@@ -187,6 +187,7 @@ public class Parser {
             analyzer.gen_activation_rec();
             printBranch();
             statementPart();
+            analyzer.gen_deactivation_rec();
             break;
         default:
             syntaxError("var, begin, function, procedure");
@@ -466,7 +467,7 @@ public class Parser {
             printBranch();
             match(TokenType.MP_THEN);
             statement();
-            analyzer.gen_branch_false(LabelMaker.getNextLabel());
+            //analyzer.gen_branch_false(LabelMaker.getNextLabel());
             printBranch();
             optionalElsePart();
             break;
@@ -743,8 +744,8 @@ public class Parser {
     /**
      * 
      */
-    public void expression() {
-
+    public RecordType expression() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_IDENTIFIER:
             case MP_FALSE:
@@ -758,7 +759,7 @@ public class Parser {
             case MP_PLUS: //68 Expression -> SimpleExpression OptionalRelationalPart
                 printNode(68, false);
                 printBranch();
-                simpleExpression();
+                r = simpleExpression();
                         
                 printBranch();
                 optionalRelationalPart();
@@ -766,6 +767,7 @@ public class Parser {
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
     /**
@@ -848,7 +850,8 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void simpleExpression() {
+    public RecordType simpleExpression() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
         case MP_FALSE:
@@ -865,7 +868,7 @@ public class Parser {
             optionalSign();
             
             printBranch();
-            term();
+            r = term();
             
             printBranch();
             termTail();
@@ -874,6 +877,7 @@ public class Parser {
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
     /**
@@ -882,6 +886,9 @@ public class Parser {
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
     public void termTail() {
+        RecordType r = null;
+        TokenType t = null;
+                
         switch (lookAhead.getToken()) {
         case MP_COMMA:
         case MP_RPAREN:
@@ -907,11 +914,11 @@ public class Parser {
         case MP_PLUS: //78 TermTail -> AddingOperator Term TermTail
             printNode(78, false);
             printBranch();
-            addingOperator();
+            t = addingOperator();
             
             printBranch();
-            term();
-            
+            r = term();
+            analyzer.gen_add_op(t, r);
             printBranch();
             termTail();
             break;
@@ -950,23 +957,28 @@ public class Parser {
         }
     }
 
-    public void addingOperator() {
+    public TokenType addingOperator() {
+        TokenType t = null;
         switch (lookAhead.getToken()) {
         case MP_OR: //85 AddingOperator -> mp_or
             printNode(85, true);
+            t = TokenType.MP_OR;
             match(TokenType.MP_OR);
             break;
         case MP_MINUS: //84 AddingOperator -> mp_minus
             printNode(84, true);
+            t = TokenType.MP_MINUS;
             match(TokenType.MP_MINUS);
             break;
         case MP_PLUS: //83 AddingOperator -> mp_plus
             printNode(83, true);
+            t = TokenType.MP_PLUS;
             match(TokenType.MP_PLUS);
             break;
         default:
             syntaxError("or, -, +");
         }
+        return t;
     }
 
     /**
@@ -974,7 +986,8 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void term() {
+    public RecordType term() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
         case MP_FALSE:
@@ -986,7 +999,9 @@ public class Parser {
         case MP_INTEGER_LIT: //86 Term -> Factor FactorTail
             printNode(86, false);
             printBranch();
-            factor();
+            
+                      
+            r = factor();
             
             printBranch();
             factorTail();
@@ -994,6 +1009,7 @@ public class Parser {
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer");
         }
+        return r;
     }
 
     /**
@@ -1002,6 +1018,7 @@ public class Parser {
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
     public void factorTail() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_COMMA:
             case MP_RPAREN:
@@ -1033,11 +1050,11 @@ public class Parser {
                 printNode(87, false);
                 
                 printBranch();
-                multiplyingOperator();
+                TokenType t = multiplyingOperator();
                 
                 printBranch();
-                factor();
-                
+                r = factor();
+                analyzer.gen_mul_op(t, r);
                 printBranch();
                 factorTail();
                 break;
@@ -1050,31 +1067,38 @@ public class Parser {
      * 
      * @return SemanticRec RecordType.MUL_OP
      */
-    public void multiplyingOperator() {
+    public TokenType multiplyingOperator() {
+        TokenType t = null;
         switch (lookAhead.getToken()) {
         case MP_AND: //92 MultiplyingOperator -> mp_and
             printNode(92, true);
+            t = TokenType.MP_AND;
             match(TokenType.MP_AND);
             break;
         case MP_MOD: //91 MultiplyingOperator -> mp_mod
             printNode(91, true);
+            t = TokenType.MP_MOD;
             match(TokenType.MP_MOD);
             break;
         case MP_FLOAT_DIVIDE: //112 MultiplyingOperator -> mp_float_divide "/"
             printNode(112, true);
+            t = TokenType.MP_FLOAT_DIVIDE;
             match(TokenType.MP_FLOAT_DIVIDE);
             break;
         case MP_DIV: //90 MultiplyingOperator -> mp_div "div"
             printNode(90, true);
+            t = TokenType.MP_DIV;
             match(TokenType.MP_DIV);
             break;
         case MP_TIMES: //89 MultiplyingOperator -> mp_times
             printNode(89, true);
+            t = TokenType.MP_TIMES;
             match(TokenType.MP_TIMES);
             break;
         default:
             syntaxError("and, mod, div, / , *");
         }
+        return t;
     }
 
     /**
@@ -1082,14 +1106,26 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.IDENTIFIER or RecordType.LITERAL
      */
-    public void factor() {
-        
+    public RecordType factor() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
             printNode(106, false);
                 
             printBranch();
-            variableIdentifier();
+            String lexeme = variableIdentifier();
+            SymbolTableRecord record = symbolTableStack.getSymbolInScope((lexeme));
+            if (record == null) {
+                semanticError("Identifier not declared");
+            }
+            int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+            if (record.getKind() == RecordKind.VARIABLE) {
+                analyzer.gen_id_push(record.getOffset(), nestingLevel);
+            } else if (record.getKind() == RecordKind.PROCEDURE || record.getKind() == RecordKind.FUNCTION) {
+                
+            } else {
+                semanticError("Semantic Error");
+            }
             //functionIdentifier();
             
             printBranch();
@@ -1100,7 +1136,7 @@ public class Parser {
             printNode(96, false);
             match(TokenType.MP_LPAREN);
             printBranch();
-            expression();
+            r = expression();
             
             match(TokenType.MP_RPAREN);
             break;
@@ -1108,31 +1144,42 @@ public class Parser {
             printNode(95, false);
             printBranch();
             match(TokenType.MP_NOT);
-            factor();
+            r = factor();
             break;
         case MP_INTEGER_LIT: //93 Factor -> mp_integer_lit
             printNode(93, true);
+            analyzer.gen_lit_push(lookAhead.getLexeme());
             match(TokenType.MP_INTEGER_LIT);
+            r = RecordType.INTEGER;
             break;
         case MP_FALSE: //116 Factor -> mp_false
             printNode(116, true);
+            analyzer.gen_lit_push("0");
             match(TokenType.MP_FALSE);
+            r = RecordType.BOOLEAN;
             break;
         case MP_TRUE: //115 Factor -> mp_true
             printNode(115, true);
+            analyzer.gen_lit_push("1");
             match(TokenType.MP_TRUE);
+            r = RecordType.BOOLEAN;
             break;
         case MP_STRING_LIT: //114 Factor -> mp_string_lit
             printNode(114, true);
+            analyzer.gen_lit_push("\"" + lookAhead.getLexeme() + "\"");
             match(TokenType.MP_STRING_LIT);
+            r = RecordType.STRING;
             break;
         case MP_FLOAT_LIT: //113 Factor -> mp_float_lit
             printNode(113, true);
+            analyzer.gen_lit_push(lookAhead.getLexeme());
             match(TokenType.MP_FLOAT_LIT);
+            r = RecordType.FLOAT;
             break;
         default:
             syntaxError("identifier, (, not, Integer, false, true, String, Float");
         }
+        return r;
     }
 
     public String programIdentifier() {
@@ -1577,9 +1624,17 @@ public class Parser {
         {
             case MP_IDENTIFIER: 
                 
-                variableIdentifier();
+                String lexeme = variableIdentifier();
+                SymbolTableRecord record = symbolTableStack.getSymbolInScope(lexeme);
+                if (record == null) {
+                    semanticError("Variable not declared");
+                }
+                int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+                
                 match(TokenType.MP_ASSIGN);
                 expression();
+                
+                analyzer.gen_id_pop(record.getOffset(), nestingLevel);
                 //functionIdentifier();
                 //match(TokenType.MP_ASSIGN);
                 //expression(null)        

@@ -1,4 +1,3 @@
- 
   MOV SP D0
   ADD SP #3 SP
   RD 2(D0)
@@ -14,16 +13,16 @@ L1:
   ADDS
   POP 1(D0)
   PUSH 1(D0)
-  WRTS
+  WRTLNS
   PUSH 0(D0)
-  WRTS
+  WRTLNS
   PUSH 1(D0)
   PUSH 2(D0)
   CMPGTS
-  BRFS L1
   PUSH 1(D0)
   PUSH #100
   CMPLES
+  ANDS
   BRFS L1
   MOV D0 SP
   HLT

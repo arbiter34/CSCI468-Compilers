@@ -19,7 +19,7 @@ L1:
 	BRFS L2
 	PUSH 0(D0)
 	WRTS
-	ADD 1(D0)
+	ADD 0(D0) #1 0(D0)
 	BR L1
 L2:
 	MOV D0 SP
