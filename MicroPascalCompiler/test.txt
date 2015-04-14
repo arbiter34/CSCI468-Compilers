@@ -14,14 +14,19 @@ end;
 
 
 
-procedure stuff(x: Integer);
+function stuff(x: Integer): boolean;
 var
 	test: String;
 begin;
 	x := 5;
 	test := 'stuff function var';
 	Write(test);
-	Write(do_things(0, 0.0), 'Second Write\n');
+	while (x <= 100) do
+	begin
+		Write(do_things(0, 0.0), x, ': Second Write\n');
+		x := x + 1;
+	end;
+	stuff := true;
 end;
 
 begin
@@ -32,5 +37,26 @@ begin
 	test := 0.0;
 
 
-	stuff(10);
+	if (stuff(10)) then
+		Write('stuff returned success\n')
+	else
+		Write('stuff returned failure\n');
+	test := 0.0;
+	repeat
+	begin
+		Write(test, 'Repeat\n');
+		test := test + 1.0;
+	end;
+	until (test > 20.0);
+
+	for test := 2.0 to 20.0 do
+	begin
+		Write(test, 'For\n');
+	end;
+
+	for test := 20.0 downto 2.0 do
+	begin
+		Write(test, 'For\n');
+	end;
+	
 end.

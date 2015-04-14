@@ -601,9 +601,12 @@ public class Parser {
             
             r = finalValue();
             
-            analyzer.gen_bool_expr(TokenType.MP_LEQUAL, r);
+            if (forDirection == TokenType.MP_TO) {
+                analyzer.gen_bool_expr(TokenType.MP_LEQUAL, r);
+            } else if (forDirection == TokenType.MP_DOWNTO) {
+                analyzer.gen_bool_expr(TokenType.MP_GEQUAL, r);
+            }
             analyzer.gen_branch_false(forEndLabel);
-            
             match(TokenType.MP_DO);
             
             if (r != record.getType()) {
@@ -614,7 +617,12 @@ public class Parser {
             
             printBranch();
             statement();
-            analyzer.gen_id_increment(r, offset, nestingLevel);
+            if (forDirection == TokenType.MP_TO) {
+                analyzer.gen_id_increment(r, offset, nestingLevel);
+            } 
+            else if (forDirection == TokenType.MP_DOWNTO) {
+                analyzer.gen_id_decrement(r, offset, nestingLevel);
+            }
             analyzer.gen_branch_unconditional(forStartLabel);
             analyzer.gen_label(forEndLabel);
             break;
