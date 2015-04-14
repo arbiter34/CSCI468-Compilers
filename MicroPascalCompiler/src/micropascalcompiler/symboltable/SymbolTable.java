@@ -63,7 +63,10 @@ public class SymbolTable {
                 this.parameterCount++;
             }
         } else if (rec.getKind() == RecordKind.FUNCTION || rec.getKind() == RecordKind.PROCEDURE) {
+            this.variableCount++;
             recDataSize = DataSize.size[4];
+        } else if (rec.getKind() == RecordKind.REG_OR_RA) {
+            recDataSize = 1;
         } else {
             recDataSize = 0;
         }

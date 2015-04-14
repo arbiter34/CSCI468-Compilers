@@ -336,7 +336,7 @@ public class Parser {
             
             printBranch();
             
-            String branchLabel = LabelMaker.getNextLabel();
+            String branchLabel = LabelMaker.getCurrentLabel();
             block(branchLabel);
             
             match(TokenType.MP_SCOLON);
@@ -357,7 +357,7 @@ public class Parser {
             match(TokenType.MP_SCOLON);
             
             printBranch();
-            String branchLabel = LabelMaker.getNextLabel();
+            String branchLabel = LabelMaker.getCurrentLabel();
             block(branchLabel);
             match(TokenType.MP_SCOLON);
             removeSymbolTable();
@@ -382,13 +382,16 @@ public class Parser {
             printBranch();
             params = optionalFormalParameterList();
             
-            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId, null, RecordKind.PROCEDURE, null, params));            
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId, null, RecordKind.PROCEDURE, null, params));    
+            symbolTableStack.getCurrentTable().getRecord(procId).setLabel(LabelMaker.getNextLabel());
             addSymbolTable(procId, LabelMaker.getCurrentLabel());
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId+"reg", null, RecordKind.REG_OR_RA, null, null));
             if (params != null) {
                 for (RecordParameter p: params) {
                     symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
                 }
             }
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId+"ra", null, RecordKind.REG_OR_RA, null, null));
 
             break;
         default:
@@ -416,13 +419,16 @@ public class Parser {
             match(TokenType.MP_COLON);
             printBranch();
             RecordType t = type();
-            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId, t, RecordKind.FUNCTION, null, params));
-            addSymbolTable(funcId, LabelMaker.getCurrentLabel());
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId, t, RecordKind.FUNCTION, null, params));    
+            symbolTableStack.getCurrentTable().getRecord(funcId).setLabel(LabelMaker.getNextLabel());
+            addSymbolTable(funcId, LabelMaker.getCurrentLabel());            
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId+"reg", null, RecordKind.REG_OR_RA, null, null));
             if (params != null) {
                 for (RecordParameter p: params) {
                     symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
                 }
-            }
+            }            
+            symbolTableStack.insertSymbolInScope(new SymbolTableRecord(funcId+"ra", null, RecordKind.REG_OR_RA, null, null));
             break;
         default:
             syntaxError("function");
@@ -712,9 +718,32 @@ public class Parser {
                 printNode(62, false);
                 printBranch();
                 procId = procedureIdentifier();
+                
+                SymbolTableRecord record = symbolTableStack.getSymbolInScope(procId);
+                int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+                long offset = record.getOffset();
+                
+                if (record == null) {
+                    semanticError("Procedure '" + procId + "' not declared in this scope.");
+                }
+                
+                if (record.getKind() != RecordKind.PROCEDURE) {
+                    semanticError("'" + procId + "' is not a valid procedure symbol.");
+                }
 
                 printBranch();
-                optionalActualParameterList();
+                analyzer.gen_sp_increment(1); //Leave space for old register value
+                optionalActualParameterList(record);
+                String procedureLabel = record.getLabel();
+                
+                if (procedureLabel == null) {
+                    semanticError("Unable to find label for scope '" + procId + "'.");
+                }
+                
+                analyzer.gen_call(procedureLabel);
+                analyzer.gen_sp_decrement(record.getParameters().size());
+                analyzer.gen_sp_decrement(1);   //Remove space for old register value
+                
                 break;
             default:
                 syntaxError("identifier");
@@ -722,7 +751,8 @@ public class Parser {
         }
     }
 
-    public void optionalActualParameterList() {
+    public void optionalActualParameterList(SymbolTableRecord record) {
+        ArrayList<RecordType> actualParameterList = new ArrayList<>();
         switch (lookAhead.getToken()) {
         case MP_COMMA:
         case MP_RPAREN:
@@ -749,17 +779,31 @@ public class Parser {
         case MP_SCOLON:
         case MP_END: //64 OptionalActualParameterList -> lambda
             printNode(64, true);
+            if (record.getParameters().size() > 0) {
+                semanticError("'" + record.getLexeme() + "' requires " + record.getParameters().size() + " parameters, 0 given.");
+            }
             lambda();
             break;
         case MP_LPAREN: //63 OptionalActualParameterList -> mp_lparen ActualParameter ActualParameterTail mp_rparen
             printNode(63, false);
             printBranch();
             match(TokenType.MP_LPAREN);
-            actualParameter();
+            actualParameterList.add(actualParameter());
             
             printBranch();
-            actualParameterTail();
-
+            actualParameterTail(actualParameterList);
+            
+            int i = 0;
+            if (actualParameterList.size() != record.getParameters().size()) {
+                semanticError("'" + record.getLexeme() + "' requires " + record.getParameters().size() + " parameters, " + actualParameterList.size() + " given.");
+            }
+            for (RecordType r : actualParameterList) {
+                if (r != record.getParameters().get(i).getType()) {
+                    semanticError("Invalid parameter for '" + record.getLexeme() + "'. " + r + " given, " 
+                            + record.getParameters().get(i).getType() + " expected.");
+                }
+                i++;
+            }
             match(TokenType.MP_RPAREN);
             break;
         default:
@@ -767,16 +811,16 @@ public class Parser {
         }
     }
 
-    public void actualParameterTail() {
+    public void actualParameterTail(ArrayList<RecordType> actualParameterList) {
         switch (lookAhead.getToken()) {
             case MP_COMMA: //65 ActualParameterTail -> mp_comma ActualParameter ActualParameterTail
                 printNode(65, false);
                 printBranch();
                 match(TokenType.MP_COMMA);
-                actualParameter();
+                actualParameterList.add(actualParameter());
                 
                 printBranch();
-                actualParameterTail();
+                actualParameterTail(actualParameterList);
                 break;
             case MP_RPAREN: //66 ActualParameterTail -> lambda
                 printNode(66, true);
@@ -787,7 +831,8 @@ public class Parser {
         }
     }
 
-    public void actualParameter() {
+    public RecordType actualParameter() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_IDENTIFIER:
             case MP_FALSE:
@@ -802,12 +847,13 @@ public class Parser {
             case MP_PLUS: //67 ActualParameter -> OrdinalExpression
                 printNode(67, false);
                 printBranch();
-                ordinalExpression();
+                r = ordinalExpression();
 
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
     /**
@@ -1201,19 +1247,46 @@ public class Parser {
             int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
             if (record.getKind() == RecordKind.VARIABLE) {
                 analyzer.gen_id_push(record.getOffset(), nestingLevel);
-            } else if (record.getKind() == RecordKind.PROCEDURE || record.getKind() == RecordKind.FUNCTION) {
+            } else if (record.getKind() == RecordKind.FUNCTION) {
                 
+                long offset = record.getOffset();
+                
+                if (record == null) {
+                    semanticError("Symbol '" + lexeme + "' not declared in this scope.");
+                }
+                
+                if (record.getKind() != RecordKind.FUNCTION) {
+                    semanticError("'" + lexeme + "' is not a valid function symbol.");
+                }
+
+                printBranch();
+                analyzer.gen_sp_increment(1);
+                optionalActualParameterList(record);
+                String procedureLabel = record.getLabel();
+                
+                if (procedureLabel == null) {
+                    semanticError("Unable to find label for scope '" + lexeme + "'.");
+                }
+                
+                analyzer.gen_call(procedureLabel);
+                analyzer.gen_sp_decrement(record.getParameters().size());
+                analyzer.gen_sp_decrement(1);
+                
+                //If function, push return value
+                if (record.getKind() == RecordKind.FUNCTION) {
+                    analyzer.gen_id_push(offset, nestingLevel);
+                }
             } else {
-                semanticError("Semantic Error");
+                semanticError("Invalid factor");
             }
             
             if (record.getKind() == RecordKind.FUNCTION || record.getKind() == RecordKind.VARIABLE) {
                 r = record.getType();
             }
+            
             //functionIdentifier();
             
             printBranch();
-            optionalActualParameterList();
 
             break;
         case MP_LPAREN: //96 Factor -> mp_lparen Expression mp_rparen

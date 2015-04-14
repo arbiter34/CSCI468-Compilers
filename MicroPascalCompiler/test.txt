@@ -2,36 +2,35 @@ program do_stuff;
 var
 	test: Float;
 
-procedure do_things;
+function do_things(xz: integer; yz: float): String;
 var
 	x, y: integer;
 begin;
 	x := 5;
-	y := x + 7 * 6
+	y := x + 7 * 6;
+	do_things := 'YAY!!\n';
 end;
 
 
 
 
-function stuff(x: Integer): boolean;
+procedure stuff(x: Integer);
 var
-	test: Float;
+	test: String;
 begin;
-	test := 5.0/7.0 + (4.0*2.0);
+	x := 5;
+	test := 'stuff function var';
 	Write(test);
+	Write(do_things(0, 0.0), 'Second Write\n');
 end;
 
 begin
+	test := 20938.000;
 	Write(test);
 	Write('\n');
 
 	test := 0.0;
 
-	for test := 1.0 to 100.0 do
-	begin
-		Write(test, '\n');
-		test := test + 1.0;
-	end;
-	
 
+	stuff(10);
 end.

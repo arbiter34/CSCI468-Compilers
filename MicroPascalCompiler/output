@@ -2,21 +2,23 @@ br L1
 L2:
 	; do_things start
 add SP #2 SP
-mov D1 -4(SP)
-sub SP #4 D1
-	; activation end
+mov D1 -6(SP)
+sub SP #6 D1
 	; activation end
 push #5
-pop 0(D1)
-push 0(D1)
+pop 4(D1)
+push 4(D1)
 push #7
 push #6
 muls
 adds
-pop 1(D1)
+pop 5(D1)
+push #"YAY!!\n"
+pop 1(D0)
 	; deactivation start
 mov D1 SP
-mov -4(SP) D1
+mov 0(SP) D1
+add SP #4 SP
 ret
 	; do_things end
 L3:
@@ -25,51 +27,46 @@ add SP #1 SP
 mov D1 -4(SP)
 sub SP #4 D1
 	; activation end
-	; activation end
-push #5.0
-push #7.0
-divsf
-push #4.0
-push #2.0
-mulsf
-addsf
+push #5
 pop 1(D1)
-push 1(D1)
+push #"stuff function var"
+pop 3(D1)
+push 3(D1)
+wrts
+add SP #1 SP
+push #0
+push #0.0
+call L2
+sub SP #2 SP
+sub SP #1 SP
+push 1(D0)
+wrts
+push #"Second Write\n"
 wrts
 	; deactivation start
 mov D1 SP
-mov -4(SP) D1
+mov 0(SP) D1
+add SP #3 SP
 ret
 	; stuff end
 L1:
 	; do_stuff start
-add SP #1 SP
-sub SP #1 D0
+add SP #3 SP
+sub SP #3 D0
 	; activation end
+push #20938.000
+pop 0(D0)
 push 0(D0)
 wrts
 push #"\n"
 wrts
 push #0.0
 pop 0(D0)
-push #1.0
-pop 0(D0)
-L4:
-push 0(D0)
-push #100.0
-cmplesf
-brfs L5
-push 0(D0)
-wrts
-push #"\n"
-wrts
-push 0(D0)
-push #1.0
-addsf
-pop 0(D0)
-addf 0(D0) #1.0 0(D0)
-br L4
-L5:
+add SP #1 SP
+push #10
+call L3
+sub SP #1 SP
+sub SP #1 SP
 	; deactivation start
 mov D0 SP
 	; do_stuff end

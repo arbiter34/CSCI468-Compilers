@@ -91,4 +91,18 @@ public class SymbolTableStack {
         }
     }
     
+    public String getScopeLabel(String scopeName) {
+        if (stack.empty()) {
+            return null;
+        }
+        int depth = stack.indexOf(stack.peek());
+        for (int i = depth; i >= 0; i--) {
+           if (stack.get(i).getScopeName() == scopeName) {
+               previousRecordNestingLevel = stack.get(i).getNestingLevel();
+               return stack.get(i).getLabel();
+           } 
+        }
+        return null;
+    }
+    
 }

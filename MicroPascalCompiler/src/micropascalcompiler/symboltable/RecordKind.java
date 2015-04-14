@@ -14,5 +14,7 @@ public enum RecordKind {
     
     PROCEDURE,
     
-    FUNCTION
+    FUNCTION,
+    
+    REG_OR_RA
 }

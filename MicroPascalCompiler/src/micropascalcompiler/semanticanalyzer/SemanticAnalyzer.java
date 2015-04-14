@@ -343,12 +343,12 @@ public class SemanticAnalyzer {
             add("SP", "#" + variableCount, "SP"); //reserveSpace for the variables in the program
             register = "D" + (tbl.getNestingLevel());
             if (nestingLevel == 0) {
-                sub("SP", "#" + (variableCount + parameterCount), register);
+                sub("SP", "#" + (variableCount), register);
             } else {
                 offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; //one slot for return address, one slot for the old register value
                 move(register, offset); //moves the current register into the space reserved for the old register
                 sub("SP", "#" + (variableCount + parameterCount + 2), register); //calculates the new register value as the first position in the AR
-                comment("activation end");                
+                              
             }
             comment("activation end");                        
     }
@@ -359,13 +359,14 @@ public class SemanticAnalyzer {
         int variableCount = tbl.getVariableCount();
         int parameterCount = tbl.getParameterCount();
         int nestingLevel = tbl.getNestingLevel();
+        String raOffset = "#" + (parameterCount+2);
         String register = "D" + nestingLevel;
-        String offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; //one slot for return address, one slot for the old register value
         comment("deactivation start");
         move("D" + nestingLevel, "SP"); //removes the variables
         if (nestingLevel == 0) {
         } else {
-            move(offset, register); //moves the old register value back into the register       
+            move("0(SP)", register); //moves the old register value back into the register   
+            add("SP", raOffset, "SP");
             ret();     
         }
         comment(tbl.getScopeName() + " end"); //; Program1 end
@@ -487,6 +488,10 @@ public class SemanticAnalyzer {
         branchUnconditional(branchLabel);
     }
     
+    public void gen_call(String label) {
+        call(label);
+    }
+    
     public String getNestingLevelString(int nestingLevel) {
         return "(D" + Integer.toString(nestingLevel) + ")";
     }
@@ -528,6 +533,14 @@ public class SemanticAnalyzer {
         } else if (r == RecordType.STRING) {
             readS(Long.toString(offset) + getNestingLevelString(nestingLevel));
         }
+    }
+    
+    public void gen_sp_increment(int increment) {
+        add("SP", "#" + increment, "SP");
+    }
+    
+    public void gen_sp_decrement(int decrement) {
+        sub("SP", "#" + decrement, "SP");
     }
     
     public void gen_write_op() {

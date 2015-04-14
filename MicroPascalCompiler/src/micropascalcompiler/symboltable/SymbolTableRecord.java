@@ -19,6 +19,7 @@ public class SymbolTableRecord {
     private int size;
     private ArrayList<RecordParameter> parameters;
     private long offset;
+    private String label;
     
     public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters) {
         this.lexeme = lexeme;
@@ -30,6 +31,14 @@ public class SymbolTableRecord {
         
         this.offset = 0;
         this.size = 0;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
     }
     
     public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters, String label) {
