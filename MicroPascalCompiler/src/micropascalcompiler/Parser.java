@@ -465,13 +465,17 @@ public class Parser {
             match(TokenType.MP_IF);
             printBranch();
             booleanExpression();
-            
+            String elseStartLabel = LabelMaker.getNextLabel();
+            analyzer.gen_branch_false(elseStartLabel);
             printBranch();
             match(TokenType.MP_THEN);
             statement();
-            //analyzer.gen_branch_false(LabelMaker.getNextLabel());
+            String elseEndLabel = LabelMaker.getNextLabel();
+            analyzer.gen_branch_unconditional(elseEndLabel);
             printBranch();
+            analyzer.gen_label(elseStartLabel);
             optionalElsePart();
+            analyzer.gen_label(elseEndLabel);
             break;
         default:
             syntaxError("if");
@@ -506,12 +510,18 @@ public class Parser {
         case MP_REPEAT: //54 RepeatStatement -> mp_repeat StatementSequence mp_until BooleanExpression
             printNode(54, false);
             printBranch();
+            
             match(TokenType.MP_REPEAT);
+            String repeatStartLabel = LabelMaker.getNextLabel();
+            
+            analyzer.gen_label(repeatStartLabel);
+            
             statementSequence();            
             
             printBranch();
             match(TokenType.MP_UNTIL);
             booleanExpression();
+            analyzer.gen_branch_false(repeatStartLabel);
             break;
         default:
             syntaxError("repeat");
@@ -526,11 +536,20 @@ public class Parser {
             printNode(55, false);
             printBranch();
             match(TokenType.MP_WHILE);
+            
+            String whileStartLabel = LabelMaker.getNextLabel();
+            
+            analyzer.gen_label(whileStartLabel);
             booleanExpression();
+            
+            String endWhileLabel = LabelMaker.getNextLabel();
+            analyzer.gen_branch_false(endWhileLabel);    
             
             printBranch();
             match(TokenType.MP_DO);
             statement();
+            analyzer.gen_branch_unconditional(whileStartLabel);
+            analyzer.gen_label(endWhileLabel);
             break;
         default:
             syntaxError("while");
@@ -804,9 +823,9 @@ public class Parser {
                 printNode(69, false);
                 printBranch();
                 t = relationalOperator();
-                analyzer.gen_bool_expr(t, r);
                 printBranch();
                 simpleExpression();
+                analyzer.gen_bool_expr(t, r);
                 break;
             default:
                 syntaxError("',', ), downto, to, do, until, else, then, ;, end, <>, >=, <=, >, <, =");
@@ -1186,6 +1205,7 @@ public class Parser {
             break;
         case MP_STRING_LIT: //114 Factor -> mp_string_lit
             printNode(114, true);
+            lookAhead.setLexeme(lookAhead.getLexeme().replaceAll("'", ""));
             analyzer.gen_lit_push("\"" + lookAhead.getLexeme() + "\"");
             match(TokenType.MP_STRING_LIT);
             r = RecordType.STRING;
@@ -1679,7 +1699,7 @@ public class Parser {
                 match(TokenType.MP_ASSIGN);
                 r = expression();
                 if (r != record.getType()) {
-                    semanticError("Unable to do implicit conversion from " + r + " to " + record.getType() + ".");
+                    semanticError("Unable to do implicit cast from " + r + " to " + record.getType() + ".");
                 }
                 analyzer.gen_id_pop(record.getOffset(), nestingLevel);
                 //functionIdentifier();

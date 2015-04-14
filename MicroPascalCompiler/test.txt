@@ -22,13 +22,17 @@ begin;
 end;
 
 begin
-	Read(test);
 	Write(test);
-	if (test) then
+	Write('\n');
+
+	test := 0.0;
+
+	repeat
 	begin
-		stuff;
-		
-	end
-	else
-		things;
+		Write(test, '\n');
+		test := test + 1.0;
+	end;
+	until (test = 100.0);
+
+	Write(test);
 end.

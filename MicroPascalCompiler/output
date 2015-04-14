@@ -46,10 +46,27 @@ L1:
 add SP #1 SP
 sub SP #1 D0
 	; activation end
-rdf 0(D0)
 push 0(D0)
 wrts
+push #"\n"
+wrts
+push #0.0
+pop 0(D0)
+L4:
 push 0(D0)
+wrts
+push #"\n"
+wrts
+push 0(D0)
+push #1.0
+addsf
+pop 0(D0)
+push 0(D0)
+push #100.0
+cmpeqsf
+brfs L4
+push 0(D0)
+wrts
 	; deactivation start
 mov D0 SP
 	; do_stuff end

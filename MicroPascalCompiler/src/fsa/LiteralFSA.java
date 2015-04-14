@@ -55,7 +55,7 @@ public class LiteralFSA extends AbstractFSA {
                     case 1:
                         if (c == '\'') {
                             length++;
-                            t.setToken(TokenType.MP_STRING);
+                            t.setToken(TokenType.MP_STRING_LIT);
                             state = -1;
                         } else if (c == -1) {
                             t.setToken(TokenType.MP_RUN_STRING);
