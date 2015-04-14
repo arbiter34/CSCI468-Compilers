@@ -339,6 +339,10 @@ public class SemanticAnalyzer {
      * VM ASM methods section end
      */
     
+    public void gen_comment(String comment) {
+        comment(comment);
+    }
+    
     public void gen_label(String label) {
         label(label);
     }
@@ -512,6 +516,10 @@ public class SemanticAnalyzer {
         call(label);
     }
     
+    public void gen_not_op() {
+        not();
+    }
+    
     public String getNestingLevelString(int nestingLevel) {
         return "(D" + Integer.toString(nestingLevel) + ")";
     }
@@ -536,8 +544,21 @@ public class SemanticAnalyzer {
         push(Long.toString(offset) + getNestingLevelString(nestingLevel));
     }
     
+    public void gen_id_addr_push(long offset, int nestingLevel) {
+        move(Long.toString(offset) + getNestingLevelString(nestingLevel), "0(SP)");
+        add("SP", "#1", "SP");
+    }
+    
+    public void gen_id_deref_push(long offset, int nestingLevel) {
+        push("" + Long.toString(offset) + getNestingLevelString(nestingLevel));
+    }
+    
     public void gen_id_pop(long offset, int nestingLevel) {
         pop(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    }
+    
+    public void gen_id_deref_pop(long offset, int nestingLevel) {
+        pop("" + Long.toString(offset) + getNestingLevelString(nestingLevel));
     }
     
     public void gen_lit_push(String value) {

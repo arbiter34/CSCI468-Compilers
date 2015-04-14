@@ -26,8 +26,8 @@ public class SymbolTableStack {
         stack = new Stack<SymbolTable>();
     }
     
-    public void generateSymbolTable(String scopeName, String label) {
-        stack.push(new SymbolTable(scopeName, label, nestingLevel));
+    public void generateSymbolTable(String scopeName, String label) {        
+        stack.push(new SymbolTable(scopeName.toLowerCase(), label.toLowerCase(), nestingLevel));
         nestingLevel++;
     }
     
@@ -52,6 +52,7 @@ public class SymbolTableStack {
     }
     
     public boolean symbolExistsInLocalScope(String symbol) {
+        symbol = symbol.toLowerCase();
         if (stack.empty()) {
             return false;
         }
@@ -59,6 +60,7 @@ public class SymbolTableStack {
     }
     
     public boolean scopeExists(String scopeName) {
+        scopeName = scopeName.toLowerCase();
         if (stack.empty()) {
             return false;
         }
@@ -72,6 +74,7 @@ public class SymbolTableStack {
     }
     
     public SymbolTableRecord getSymbolInScope(String symbol) {
+        symbol = symbol.toLowerCase();
         if (stack.empty()) {
             return null;
         }
@@ -86,12 +89,14 @@ public class SymbolTableStack {
     }
     
     public void insertSymbolInScope(SymbolTableRecord rec) {
-        if (!symbolExistsInLocalScope(rec.getLexeme())) {
+        if (!symbolExistsInLocalScope(rec.getLexeme().toLowerCase())) {
+            rec.setLexeme(rec.getLexeme().toLowerCase());
             stack.peek().insert(rec);
         }
     }
     
     public String getScopeLabel(String scopeName) {
+        scopeName = scopeName.toLowerCase();
         if (stack.empty()) {
             return null;
         }

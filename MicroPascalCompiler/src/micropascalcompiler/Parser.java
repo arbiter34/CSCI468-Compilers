@@ -22,8 +22,9 @@ public class Parser {
         this.outFile = outFile;
         this.scanner = scanner;
         this.analyzer = new SemanticAnalyzer(symbolTableStack, fixFileName(fileName) + ".asm");
-        lookAhead = scanner.getNextToken();
-        lookAhead2 = scanner.getNextToken();
+
+        getNextToken();
+        getNextToken();
         systemGoal();
         printSymbolTables();
         this.outFile.close();
@@ -49,7 +50,10 @@ public class Parser {
 
     private void getNextToken() {
         lookAhead = lookAhead2;
-        lookAhead2 = scanner.getNextToken();
+        do {
+            lookAhead2 = scanner.getNextToken();
+        } while (lookAhead2.getToken() == TokenType.MP_COMMENT);
+        
     }
 
     public void match(TokenType tokenInput) {
@@ -81,8 +85,9 @@ public class Parser {
         System.exit(1);
     }
     
-    public static void semanticError(String errorMessage) {
+    public void semanticError(String errorMessage) {
         System.out.println("Semantic Error: " + errorMessage);
+        System.out.println("Line: " + (lookAhead.getRow()-1));
         System.exit(1);
     }
 
@@ -583,6 +588,7 @@ public class Parser {
             printBranch();
             match(TokenType.MP_ASSIGN);
             
+            analyzer.gen_comment("For control statement start");
             printBranch();
                         
             RecordType r = initialValue();
@@ -595,15 +601,20 @@ public class Parser {
             
             String forEndLabel = LabelMaker.getNextLabel();
             
+            analyzer.gen_comment("Initialize for control variable");
             analyzer.gen_id_pop(offset, nestingLevel);  //pop initial value into control var
-            
-            analyzer.gen_label(forStartLabel);
-            
-            analyzer.gen_id_push(offset, nestingLevel);
             
             TokenType forDirection = stepValue();
             
             r = finalValue();
+            
+            
+            analyzer.gen_label(forStartLabel);
+            analyzer.gen_id_push(offset, nestingLevel);
+            
+            int topNestingLevel = symbolTableStack.getCurrentTable().getNestingLevel();
+            int tableSize = symbolTableStack.getCurrentTable().getSize();
+            analyzer.gen_id_push(tableSize, topNestingLevel);
             
             if (forDirection == TokenType.MP_TO) {
                 analyzer.gen_bool_expr(TokenType.MP_LEQUAL, r);
@@ -669,7 +680,7 @@ public class Parser {
         case MP_PLUS: //58 InitialValue -> OrdinalExpression
             printNode(58, false);
             printBranch();
-            r = ordinalExpression();
+            r = ordinalExpression(null);
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -714,7 +725,7 @@ public class Parser {
             case MP_PLUS: //61 FinalValue -> OrdinalExpression
                 printNode(61, false);
                 printBranch();
-                r = ordinalExpression();
+                r = ordinalExpression(null);
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -733,6 +744,7 @@ public class Parser {
                 
                 SymbolTableRecord record = symbolTableStack.getSymbolInScope(procId);
                 int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+                int numParams = record.getParameters() == null ? 0 : record.getParameters().size();
                 
                 if (record == null) {
                     semanticError("Procedure '" + procId + "' not declared in this scope.");
@@ -753,7 +765,7 @@ public class Parser {
                 }
                 
                 analyzer.gen_call(procedureLabel);
-                analyzer.gen_sp_decrement(record.getParameters().size());
+                analyzer.gen_sp_decrement(numParams);
                 analyzer.gen_sp_decrement(1);   //Remove space for old register value
                 
                 break;
@@ -791,8 +803,9 @@ public class Parser {
         case MP_SCOLON:
         case MP_END: //64 OptionalActualParameterList -> lambda
             printNode(64, true);
-            if (record.getParameters().size() > 0) {
-                semanticError("'" + record.getLexeme() + "' requires " + record.getParameters().size() + " parameters, 0 given.");
+            if (record.getParameters() != null && record.getParameters().size() > 0) {
+                int paramsRequired = record.getParameters() == null ? 0 : record.getParameters().size();
+                semanticError("'" + record.getLexeme() + "' requires " + paramsRequired + " parameters, 0 given.");
             }
             lambda();
             break;
@@ -800,10 +813,15 @@ public class Parser {
             printNode(63, false);
             printBranch();
             match(TokenType.MP_LPAREN);
-            actualParameterList.add(actualParameter());
+            if (record.getParameters() != null) {
+                actualParameterList.add(actualParameter(record.getParameters().get(0).getMode()));
+                actualParameterTail(actualParameterList, record, 1);
+            } else {
+                actualParameterList.add(actualParameter(null));
+                actualParameterTail(actualParameterList, null, 0);
+            }
             
             printBranch();
-            actualParameterTail(actualParameterList);
             
             int i = 0;
             if (actualParameterList.size() != record.getParameters().size()) {
@@ -823,16 +841,19 @@ public class Parser {
         }
     }
 
-    public void actualParameterTail(ArrayList<RecordType> actualParameterList) {
+    public void actualParameterTail(ArrayList<RecordType> actualParameterList, SymbolTableRecord record, int currentIndex) {
         switch (lookAhead.getToken()) {
             case MP_COMMA: //65 ActualParameterTail -> mp_comma ActualParameter ActualParameterTail
                 printNode(65, false);
                 printBranch();
                 match(TokenType.MP_COMMA);
-                actualParameterList.add(actualParameter());
-                
+                if (record != null) {
+                    actualParameterList.add(actualParameter(record.getParameters().get(currentIndex).getMode()));
+                } else {
+                    actualParameterList.add(actualParameter(null));
+                }
                 printBranch();
-                actualParameterTail(actualParameterList);
+                actualParameterTail(actualParameterList, record, currentIndex+1);
                 break;
             case MP_RPAREN: //66 ActualParameterTail -> lambda
                 printNode(66, true);
@@ -843,7 +864,7 @@ public class Parser {
         }
     }
 
-    public RecordType actualParameter() {
+    public RecordType actualParameter(RecordMode mode) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_IDENTIFIER:
@@ -859,7 +880,7 @@ public class Parser {
             case MP_PLUS: //67 ActualParameter -> OrdinalExpression
                 printNode(67, false);
                 printBranch();
-                r = ordinalExpression();
+                r = ordinalExpression(mode);
 
                 break;
             default:
@@ -871,7 +892,7 @@ public class Parser {
     /**
      * 
      */
-    public RecordType expression() {
+    public RecordType expression(RecordType previousRecordType, RecordMode mode) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_IDENTIFIER:
@@ -887,7 +908,7 @@ public class Parser {
             case MP_PLUS: //68 Expression -> SimpleExpression OptionalRelationalPart
                 printNode(68, false);
                 printBranch();
-                r = simpleExpression();
+                r = simpleExpression(previousRecordType, mode);
                         
                 printBranch();
                 optionalRelationalPart(r);
@@ -927,7 +948,7 @@ public class Parser {
                 printBranch();
                 t = relationalOperator();
                 printBranch();
-                simpleExpression();
+                simpleExpression(r, null);
                 analyzer.gen_bool_expr(t, r);
                 break;
             default:
@@ -985,7 +1006,7 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public RecordType simpleExpression() {
+    public RecordType simpleExpression(RecordType previousRecordType, RecordMode mode) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
@@ -1004,7 +1025,7 @@ public class Parser {
             TokenType t = optionalSign();
             
             printBranch();
-            r = term(null);
+            r = term(previousRecordType, mode);
             
             if (r == RecordType.FLOAT && t == TokenType.MP_MINUS) {
                 analyzer.gen_negate_float();
@@ -1013,8 +1034,8 @@ public class Parser {
             }
             
             printBranch();
-            termTail(r);
-            
+            RecordType tailType = termTail(r);
+            r = tailType == null ? r : tailType;
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -1027,7 +1048,7 @@ public class Parser {
      * @param left
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void termTail(RecordType previousRecordType) {
+    public RecordType termTail(RecordType previousRecordType) {
         RecordType r = null;
         TokenType t = null;
                 
@@ -1057,22 +1078,25 @@ public class Parser {
                 printNode(78, false);
                 printBranch();
                 String addOp = lookAhead.getLexeme();
+                TokenType currentOp = lookAhead.getToken();
                 t = addingOperator();
 
                 printBranch();
-                r = term(previousRecordType);
+                r = term(previousRecordType, null);
                 
-                if ((r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
+                if ((currentOp != TokenType.MP_OR) && (r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
                         || (previousRecordType == RecordType.STRING || previousRecordType == RecordType.BOOLEAN))) {
                     semanticError("Invalid operation. '" + addOp + "' does not apply to " + previousRecordType + " and " + r + ".");
                 }
                 analyzer.gen_add_op(t, r);
                 printBranch();
-                termTail(r);
+                RecordType tailType = termTail(r);
+                r = tailType == null ? r : tailType;
                 break;
             default:
                 syntaxError("',', ), <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, or, -, +");
         }
+        return r == null ? previousRecordType : r;
     }
 
     /**
@@ -1139,7 +1163,7 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public RecordType term(RecordType previousRecordType) {
+    public RecordType term(RecordType previousRecordType, RecordMode mode) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
@@ -1155,10 +1179,13 @@ public class Parser {
             printBranch();
             
                       
-            r = factor(previousRecordType);
+            r = factor(previousRecordType, mode);
             
             printBranch();
-            factorTail(r);
+            RecordType tailType = factorTail(r);
+            if (r == RecordType.FLOAT || tailType == RecordType.FLOAT) {
+                r = RecordType.FLOAT;
+            }
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer");
@@ -1171,7 +1198,7 @@ public class Parser {
      * @param left
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void factorTail(RecordType previousRecordType) {
+    public RecordType factorTail(RecordType previousRecordType) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_COMMA:
@@ -1205,21 +1232,31 @@ public class Parser {
                 
                 printBranch();
                 String multOp = lookAhead.getLexeme();
+                TokenType currentOp = lookAhead.getToken();
                 TokenType t = multiplyingOperator();
                 
                 printBranch();
-                r = factor(previousRecordType);
-                if ((r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
+                r = factor(previousRecordType, null);
+                if ((currentOp != TokenType.MP_AND) && (r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
                         || (previousRecordType == RecordType.STRING || previousRecordType == RecordType.BOOLEAN))) {
+                    semanticError("Invalid operation. '" + multOp + "' does not apply to " + previousRecordType + " and " + r + ".");
+                }
+                if ((r != null && previousRecordType != null) 
+                        && (currentOp == TokenType.MP_AND) 
+                        && (r != RecordType.BOOLEAN || previousRecordType != RecordType.BOOLEAN)) {
                     semanticError("Invalid operation. '" + multOp + "' does not apply to " + previousRecordType + " and " + r + ".");
                 }
                 analyzer.gen_mul_op(t, r);
                 printBranch();
-                factorTail(previousRecordType);
+                RecordType tailType = factorTail(r);
+                if (r == RecordType.FLOAT || tailType == RecordType.FLOAT) {
+                    r = RecordType.FLOAT;
+                }
                 break;
             default:
                 syntaxError("',', ), or, -, +, <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, and, mod, div, / , *");
         }
+        return r == null ? previousRecordType : r;
     }
 
     /**
@@ -1265,7 +1302,7 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.IDENTIFIER or RecordType.LITERAL
      */
-    public RecordType factor(RecordType previousRecordType) {
+    public RecordType factor(RecordType previousRecordType, RecordMode mode) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
@@ -1282,11 +1319,17 @@ public class Parser {
                 analyzer.gen_cast_op(record.getType());
             } 
             if (record.getKind() == RecordKind.VARIABLE) {
-                analyzer.gen_id_push(record.getOffset(), nestingLevel);
+                if (mode == RecordMode.VARIABLE) {
+                    analyzer.gen_id_addr_push(record.getOffset(), nestingLevel); 
+                } else if (record.getMode() == RecordMode.VARIABLE) {
+                    analyzer.gen_id_deref_push(record.getOffset(), nestingLevel);
+                } else {
+                    analyzer.gen_id_push(record.getOffset(), nestingLevel);
+                }
             } else if (record.getKind() == RecordKind.FUNCTION) {
                 
                 long offset = record.getOffset();
-                
+                int numParams = record.getParameters() == null ? 0 : record.getParameters().size();
                 if (record == null) {
                     semanticError("Symbol '" + lexeme + "' not declared in this scope.");
                 }
@@ -1305,7 +1348,7 @@ public class Parser {
                 }
                 
                 analyzer.gen_call(procedureLabel);
-                analyzer.gen_sp_decrement(record.getParameters().size());
+                analyzer.gen_sp_decrement(numParams);
                 analyzer.gen_sp_decrement(1);
                 
                 //If function, push return value
@@ -1335,7 +1378,7 @@ public class Parser {
             printNode(96, false);
             match(TokenType.MP_LPAREN);
             printBranch();
-            r = expression();
+            r = expression(previousRecordType, null);
             
             match(TokenType.MP_RPAREN);
             break;
@@ -1343,16 +1386,21 @@ public class Parser {
             printNode(95, false);
             printBranch();
             match(TokenType.MP_NOT);
-            r = factor(previousRecordType);
+            r = factor(previousRecordType, null);
+            if (r != RecordType.BOOLEAN) {
+                semanticError("Invalid operation. " + r + " is not compatible with 'not'.");
+            }
+            analyzer.gen_not_op();
             break;
         case MP_INTEGER_LIT: //93 Factor -> mp_integer_lit
             printNode(93, true);
             analyzer.gen_lit_push(lookAhead.getLexeme());
+            r = RecordType.INTEGER;
             if (previousRecordType == RecordType.FLOAT) {
                 analyzer.gen_cast_op(previousRecordType);
+                r = RecordType.FLOAT;
             }
             match(TokenType.MP_INTEGER_LIT);
-            r = RecordType.INTEGER;
             break;
         case MP_FALSE: //116 Factor -> mp_false
             printNode(116, true);
@@ -1375,12 +1423,13 @@ public class Parser {
             break;
         case MP_FIXED_LIT:
             printNode(113, true);
+            r = RecordType.FLOAT;
             if (previousRecordType == RecordType.INTEGER) {
                 analyzer.gen_cast_op(RecordType.FLOAT);
+                r = RecordType.FLOAT;
             }            
             analyzer.gen_lit_push(lookAhead.getLexeme());
             match(TokenType.MP_FIXED_LIT);
-            r = RecordType.FLOAT;
             break;
         case MP_FLOAT_LIT: //113 Factor -> mp_float_lit
             printNode(113, true);
@@ -1521,7 +1570,7 @@ public class Parser {
                 
                 RecordType t = type();
                 for (String id : ids) {
-                   params.add(new RecordParameter(id, RecordMode.VALUE, t)); 
+                   params.add(new RecordParameter(id, RecordMode.VARIABLE, t)); 
                 }
                 break;
             default:
@@ -1844,7 +1893,7 @@ public class Parser {
             case MP_PLUS:
                 printNode(48, false);
                 printBranch();
-                ordinalExpression();
+                ordinalExpression(null);
                 analyzer.gen_write_op();
                 break;
             default:
@@ -1863,18 +1912,22 @@ public class Parser {
                 
                 SymbolTableRecord record = symbolTableStack.getSymbolInScope(lexeme);
                 if (record == null) {
-                    semanticError("Variable not declared");
+                    semanticError("Variable '" + lexeme + "' not declared");
                 }
                 int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
                 
                 match(TokenType.MP_ASSIGN);
-                r = expression();
+                r = expression(null, null);
                 if (record.getType() == RecordType.FLOAT && r == RecordType.INTEGER) {
                     analyzer.gen_cast_op(record.getType());
                 } else if (r != record.getType()) {
                     semanticError("Unable to do implicit cast from " + r + " to " + record.getType() + ".");
                 }
-                analyzer.gen_id_pop(record.getOffset(), nestingLevel);
+                if (record.getMode() == RecordMode.VARIABLE) {
+                    analyzer.gen_id_deref_pop(record.getOffset(), nestingLevel);
+                } else {
+                    analyzer.gen_id_pop(record.getOffset(), nestingLevel);
+                }
                 //functionIdentifier();
                 //match(TokenType.MP_ASSIGN);
                 //expression(null)        
@@ -1920,7 +1973,7 @@ public class Parser {
             case MP_PLUS:
                 printNode(102, false);
                 printBranch();
-                r = expression();
+                r = expression(null, null);
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -1928,7 +1981,7 @@ public class Parser {
         return r;
     }
 
-    public RecordType ordinalExpression()
+    public RecordType ordinalExpression(RecordMode mode)
     {
         RecordType r = null;
         switch (lookAhead.getToken())
@@ -1946,7 +1999,7 @@ public class Parser {
             case MP_PLUS:
                 printNode(103, false);
                 printBranch();
-                r = expression();
+                r = expression(null, mode);
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");

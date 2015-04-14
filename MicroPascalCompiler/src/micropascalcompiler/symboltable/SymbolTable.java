@@ -79,11 +79,11 @@ public class SymbolTable {
     }
 
     public void setScopeName(String scopeName) {
-        this.scopeName = scopeName;
+        this.scopeName = scopeName.toLowerCase();
     }
     
     public boolean exists(String key) {
-        return this.symbolTable.containsKey(key);
+        return this.symbolTable.containsKey(key.toLowerCase());
     }
 
     public int getNestingLevel() {
@@ -95,35 +95,35 @@ public class SymbolTable {
     }
     
     public SymbolTableRecord getRecord(String key) {
-        return this.symbolTable.get(key);
+        return this.symbolTable.get(key.toLowerCase());
     }
     
     public RecordKind getRecordKind(String key) {
-        return this.symbolTable.get(key).getKind();
+        return this.symbolTable.get(key.toLowerCase()).getKind();
     }
     
     public RecordType getRecordType(String key) {
-        return this.symbolTable.get(key).getType();
+        return this.symbolTable.get(key.toLowerCase()).getType();
     }
     
     public String getRecordLexeme(String key) {
-        return this.symbolTable.get(key).getLexeme();
+        return this.symbolTable.get(key.toLowerCase()).getLexeme();
     }
     
     public RecordMode getRecordMode(String key) {
-        return this.symbolTable.get(key).getMode();
+        return this.symbolTable.get(key.toLowerCase()).getMode();
     }
     
     public int getRecordSize(String key) {
-        return this.symbolTable.get(key).getSize();
+        return this.symbolTable.get(key.toLowerCase()).getSize();
     }
     
     public ArrayList<RecordParameter> getRecordParameters(String key) {
-        return this.symbolTable.get(key).getParameters();
+        return this.symbolTable.get(key.toLowerCase()).getParameters();
     }
     
     public long getRecordOffset(String key) {
-        return this.symbolTable.get(key).getOffset();
+        return this.symbolTable.get(key.toLowerCase()).getOffset();
     }
     
     public int getVariableCount() {
@@ -132,5 +132,13 @@ public class SymbolTable {
     
     public int getParameterCount() {
         return  this.parameterCount;
+    }
+    
+    public int getSize() {
+        int size = 0;
+        for (String key : symbolTable.keySet()) {
+           size++;
+        }
+        return size;
     }
 }

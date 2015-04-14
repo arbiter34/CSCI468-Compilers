@@ -48,6 +48,18 @@ public class Dispatcher {
                 if (Characters.isNewLine(c)) {
                     this.rowCount += 1;
                     this.colCount = 0;
+                    this.inFile.mark(markLimit);
+                    charByte = this.inFile.read();
+                    if (charByte == -1) {
+                        return false;
+                    }
+                    c = (char)charByte;
+                    if (Characters.isNewLine(c)) {
+                    
+                    } else {
+                        this.inFile.reset();
+                        continue;
+                    }
                 }
                 this.inFile.mark(markLimit);
             }
