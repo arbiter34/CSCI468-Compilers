@@ -547,6 +547,16 @@ public class SemanticAnalyzer {
         halt();
     }
     
+    public void gen_negate_float() {
+        push("#-1.0");
+        mulStackF();
+    }
+    
+    public void gen_negate_int() {
+        push("#-1");
+        mulStackI();
+    }
+    
     public void gen_read_op(RecordType r, long offset, int nestingLevel) {
         if (r == RecordType.INTEGER) {
             readI(Long.toString(offset) + getNestingLevelString(nestingLevel));

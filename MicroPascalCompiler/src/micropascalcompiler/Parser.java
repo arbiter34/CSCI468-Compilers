@@ -997,10 +997,16 @@ public class Parser {
         case MP_PLUS: //77 SimpleExpression -> OptionalSign Term TermTail
             printNode(77, false);
             printBranch();
-            optionalSign();
+            TokenType t = optionalSign();
             
             printBranch();
             r = term();
+            
+            if (r == RecordType.FLOAT && t == TokenType.MP_MINUS) {
+                analyzer.gen_negate_float();
+            } else if (r == RecordType.INTEGER && t == TokenType.MP_MINUS) {
+                analyzer.gen_negate_int();
+            }
             
             printBranch();
             termTail();
@@ -1063,31 +1069,35 @@ public class Parser {
      * 
      * @return SemanticRec RecordType.OPT_SIGN
      */
-    public void optionalSign() {
+    public TokenType optionalSign() {
+        TokenType t = null;
         switch (lookAhead.getToken()) {
-        case MP_IDENTIFIER:
-        case MP_FALSE:
-        case MP_TRUE:
-        case MP_STRING_LIT:
-        case MP_FIXED_LIT:
-        case MP_FLOAT_LIT: //added boolean values, string, float
-        case MP_LPAREN:
-        case MP_NOT:
-        case MP_INTEGER_LIT: //82 OptionalSign -> lambda
-            printNode(82, true);
-            lambda();
-            break;
-        case MP_MINUS: //81 OptionalSign -> mp_minus
-            printNode(81, true);
-            match(TokenType.MP_MINUS);
-            break;
-        case MP_PLUS: //80 OptionalSign -> mp_plus
-            printNode(80, true);
-            match(TokenType.MP_PLUS);
-            break;
-        default:
-            syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
+            case MP_IDENTIFIER:
+            case MP_FALSE:
+            case MP_TRUE:
+            case MP_STRING_LIT:
+            case MP_FIXED_LIT:
+            case MP_FLOAT_LIT: //added boolean values, string, float
+            case MP_LPAREN:
+            case MP_NOT:
+            case MP_INTEGER_LIT: //82 OptionalSign -> lambda
+                printNode(82, true);
+                lambda();
+                break;
+            case MP_MINUS: //81 OptionalSign -> mp_minus
+                t = TokenType.MP_MINUS;
+                printNode(81, true);
+                match(TokenType.MP_MINUS);
+                break;
+            case MP_PLUS: //80 OptionalSign -> mp_plus
+                t = TokenType.MP_PLUS;
+                printNode(80, true);
+                match(TokenType.MP_PLUS);
+                break;
+            default:
+                syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return t;
     }
 
     public TokenType addingOperator() {
