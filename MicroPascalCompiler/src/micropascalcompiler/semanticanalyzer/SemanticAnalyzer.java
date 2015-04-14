@@ -314,24 +314,32 @@ public class SemanticAnalyzer {
      * VM ASM methods section end
      */
     
+    public void gen_label(String label) {
+        label(label);
+    }
+    
     public void gen_activation_rec() {
 
             SymbolTable tbl = symbolTableStack.getCurrentTable();
-            String block = "" + tbl.getNestingLevel();
+            int nestingLevel = tbl.getNestingLevel();
+            String block = "" + nestingLevel;
             int variableCount = tbl.getVariableCount();
             int parameterCount = tbl.getParameterCount();
             String register = null;
             String offset = null;
 
-            comment(tbl.getScopeName() + " start"); //; Program1 start
+            comment(tbl.getScopeName() + " start"); //; start
             add("SP", "#" + variableCount, "SP"); //reserveSpace for the variables in the program
-            register = "D" + tbl.getNestingLevel();
-            offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; //one slot for return address, one slot for the old register value
-            move(register, offset); //moves the current register into the space reserved for the old register
-            sub("SP", "#" + (variableCount + parameterCount + 2), register); //calculates the new register value as the first position in the AR
-            comment("activation end");
-
-        
+            register = "D" + (tbl.getNestingLevel());
+            if (nestingLevel == 0) {
+                sub("SP", "#" + (variableCount + parameterCount), register);
+            } else {
+                offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; //one slot for return address, one slot for the old register value
+                move(register, offset); //moves the current register into the space reserved for the old register
+                sub("SP", "#" + (variableCount + parameterCount + 2), register); //calculates the new register value as the first position in the AR
+                comment("activation end");                
+            }
+            comment("activation end");                        
     }
 
     public void gen_deactivation_rec()
@@ -339,12 +347,16 @@ public class SemanticAnalyzer {
         SymbolTable tbl = symbolTableStack.getCurrentTable();
         int variableCount = tbl.getVariableCount();
         int parameterCount = tbl.getParameterCount();
-        String register = "D" + tbl.getNestingLevel();
+        int nestingLevel = tbl.getNestingLevel();
+        String register = "D" + nestingLevel;
         String offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; //one slot for return address, one slot for the old register value
         comment("deactivation start");
-        move(offset, register); //moves the old register value back into the register
-        sub("SP", "#" + (variableCount), "SP"); //removes the variables
-        ret();
+        move("D" + nestingLevel, "SP"); //removes the variables
+        if (nestingLevel == 0) {
+        } else {
+            move(offset, register); //moves the old register value back into the register       
+            ret();     
+        }
         comment(tbl.getScopeName() + " end"); //; Program1 end
     }
     
@@ -413,8 +425,59 @@ public class SemanticAnalyzer {
         }
     }
     
+    public void gen_bool_expr(TokenType t, RecordType r) {
+        switch (t) {
+            case MP_NEQUAL:
+                if (r == RecordType.FLOAT) {
+                    notEqualF();
+                } else if (r == RecordType.INTEGER) {
+                    notEqualI();
+                }
+                break;
+            case MP_GEQUAL:
+                if (r == RecordType.FLOAT) {
+                    greaterEqualF();
+                } else if (r == RecordType.INTEGER) {
+                    greaterEqualI();
+                }
+                break;
+            case MP_LEQUAL:
+                if (r == RecordType.FLOAT) {
+                    lessEqualF();
+                } else if (r == RecordType.INTEGER) {
+                    lessEqualI();
+                }
+                break;
+            case MP_GTHAN:
+                if (r == RecordType.FLOAT) {
+                    greaterThanF();
+                } else if (r == RecordType.INTEGER) {
+                    greaterThanI();
+                }
+                break;
+            case MP_LTHAN:
+                if (r == RecordType.FLOAT) {
+                    lessThanF();
+                } else if (r == RecordType.INTEGER) {
+                    lessThanI();
+                }
+                break;
+            case MP_EQUAL: 
+                if (r == RecordType.FLOAT) {
+                    equalF();
+                } else if (r == RecordType.INTEGER) {
+                    equalI();
+                }
+                break;
+        }
+    }
+    
+    public void gen_branch_unconditional(String branchLabel) {
+        branchUnconditional(branchLabel);
+    }
+    
     public String getNestingLevelString(int nestingLevel) {
-        return "(" + Integer.toString(nestingLevel) + ")";
+        return "(D" + Integer.toString(nestingLevel) + ")";
     }
     
     public void gen_id_push(long offset, int nestingLevel) {
@@ -436,5 +499,19 @@ public class SemanticAnalyzer {
     public void gen_halt()
     {
         halt();
+    }
+    
+    public void gen_read_op(RecordType r, long offset, int nestingLevel) {
+        if (r == RecordType.INTEGER) {
+            readI(Long.toString(offset) + getNestingLevelString(nestingLevel));
+        } else if (r == RecordType.FLOAT) {
+            readF(Long.toString(offset) + getNestingLevelString(nestingLevel));
+        } else if (r == RecordType.STRING) {
+            readS(Long.toString(offset) + getNestingLevelString(nestingLevel));
+        }
+    }
+    
+    public void gen_write_op() {
+        writeStack();
     }
 }

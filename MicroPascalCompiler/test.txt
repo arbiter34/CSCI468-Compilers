@@ -17,10 +17,13 @@ function stuff(x: Integer): boolean;
 var
 	test: Float;
 begin;
-	test := 5/7 + (4*2);
+	test := 5.0/7.0 + (4.0*2.0);
+	Write(test);
 end;
 
 begin
+	Read(test);
+	Write(test);
 	if (test) then
 	begin
 		stuff;

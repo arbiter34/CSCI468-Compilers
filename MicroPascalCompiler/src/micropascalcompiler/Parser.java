@@ -143,8 +143,9 @@ public class Parser {
             addSymbolTable(scopeName, branchLabel);
             match(TokenType.MP_SCOLON);
             printBranch();
-            block(scopeName); 
-            
+            analyzer.gen_branch_unconditional(branchLabel);
+            block(branchLabel); 
+            analyzer.gen_halt();
             match(TokenType.MP_PERIOD);
             
             break;
@@ -170,7 +171,7 @@ public class Parser {
         return name;
     }
 
-    public void block(String scopeName)
+    public void block(String scopeLabel)
     {
         switch (lookAhead.getToken()) {
         case MP_BEGIN:
@@ -184,6 +185,7 @@ public class Parser {
             
             printBranch();
             procedureAndFunctionDeclarationPart();
+            analyzer.gen_label(scopeLabel);
             analyzer.gen_activation_rec();
             printBranch();
             statementPart();
@@ -334,7 +336,7 @@ public class Parser {
             
             printBranch();
             
-            String branchLabel = LabelMaker.getCurrentLabel();
+            String branchLabel = LabelMaker.getNextLabel();
             block(branchLabel);
             
             match(TokenType.MP_SCOLON);
@@ -355,7 +357,7 @@ public class Parser {
             match(TokenType.MP_SCOLON);
             
             printBranch();
-            String branchLabel = LabelMaker.getCurrentLabel();
+            String branchLabel = LabelMaker.getNextLabel();
             block(branchLabel);
             match(TokenType.MP_SCOLON);
             removeSymbolTable();
@@ -381,7 +383,7 @@ public class Parser {
             params = optionalFormalParameterList();
             
             symbolTableStack.insertSymbolInScope(new SymbolTableRecord(procId, null, RecordKind.PROCEDURE, null, params));            
-            addSymbolTable(procId, LabelMaker.getNextLabel());
+            addSymbolTable(procId, LabelMaker.getCurrentLabel());
             if (params != null) {
                 for (RecordParameter p: params) {
                     symbolTableStack.insertSymbolInScope(new SymbolTableRecord(p.getLexeme(), p.getType(), RecordKind.VARIABLE, p.getMode(), null));
@@ -583,6 +585,7 @@ public class Parser {
         case MP_FALSE:
         case MP_TRUE:
         case MP_STRING_LIT:
+        case MP_FIXED_LIT:
         case MP_FLOAT_LIT: //added boolean values, string, float
         case MP_LPAREN:
         case MP_NOT:
@@ -621,6 +624,7 @@ public class Parser {
         case MP_FALSE:
         case MP_TRUE:
         case MP_STRING_LIT:
+        case MP_FIXED_LIT:
         case MP_FLOAT_LIT: //added boolean values, string, float
         case MP_LPAREN:
         case MP_NOT:
@@ -725,6 +729,7 @@ public class Parser {
             case MP_FALSE:
             case MP_TRUE:
             case MP_STRING_LIT:
+            case MP_FIXED_LIT:
             case MP_FLOAT_LIT: //added boolean values, string, float
             case MP_LPAREN:
             case MP_NOT:
@@ -751,6 +756,7 @@ public class Parser {
             case MP_FALSE:
             case MP_TRUE:
             case MP_STRING_LIT:
+            case MP_FIXED_LIT:
             case MP_FLOAT_LIT: //added boolean values, string, float
             case MP_LPAREN:
             case MP_NOT:
@@ -762,7 +768,7 @@ public class Parser {
                 r = simpleExpression();
                         
                 printBranch();
-                optionalRelationalPart();
+                optionalRelationalPart(r);
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -772,12 +778,9 @@ public class Parser {
 
     /**
      * 
-     * @param left
-     *            {@link SemanticRec} from {@link compiler.parser.Parser#simpleExpression()} with {@link RecordType#LITERAL} or
-     *            {@link RecordType#IDENTIFIER}
-     * @return {@link SemanticRec} either null or {@link RecordType#LITERAL}
      */
-    public void optionalRelationalPart() {
+    public TokenType optionalRelationalPart(RecordType r) {
+        TokenType t = null;
         switch (lookAhead.getToken()) {
             case MP_COMMA:
             case MP_RPAREN:
@@ -800,49 +803,59 @@ public class Parser {
             case MP_EQUAL: //69 OptionalRelationalPart -> RelationalOperator SimpleExpression
                 printNode(69, false);
                 printBranch();
-                relationalOperator();
-                
+                t = relationalOperator();
+                analyzer.gen_bool_expr(t, r);
                 printBranch();
                 simpleExpression();
                 break;
             default:
                 syntaxError("',', ), downto, to, do, until, else, then, ;, end, <>, >=, <=, >, <, =");
         }
+        return t;
     }
 
     /**
      * 
      * @return SemanticRec RecordType.REL_OP
      */
-    public void relationalOperator() {
+    public TokenType relationalOperator() {
+        TokenType t = null;
+                
         switch (lookAhead.getToken()) {
-        case MP_NEQUAL: //76 RelationalOperator -> mp_nequal
-            printNode(76, true);
-            match(TokenType.MP_NEQUAL);
-            break;
-        case MP_GEQUAL: //75 RelationalOperator -> mp_gequal
-            printNode(75, true);
-            match(TokenType.MP_GEQUAL);
-            break;
-        case MP_LEQUAL: //74 RelationalOperator -> mp_lequal
-            printNode(74, true);
-            match(TokenType.MP_LEQUAL);
-            break;
-        case MP_GTHAN: //73 RelationalOperator -> mp_gthan
-            printNode(73, true);
-            match(TokenType.MP_GTHAN);
-            break;
-        case MP_LTHAN: //72 RelationalOperator -> mp_lthan
-            printNode(72, true);
-            match(TokenType.MP_LTHAN);
-            break;
-        case MP_EQUAL: //71 RelationalOperator -> mp_equal
-            printNode(71, true);
-            match(TokenType.MP_EQUAL);
-            break;
-        default:
-            syntaxError("<>, >=, <= , >, <, =");
+            case MP_NEQUAL: //76 RelationalOperator -> mp_nequal
+                printNode(76, true);
+                t = TokenType.MP_NEQUAL;
+                match(TokenType.MP_NEQUAL);
+                break;
+            case MP_GEQUAL: //75 RelationalOperator -> mp_gequal
+                t = TokenType.MP_GEQUAL;
+                printNode(75, true);
+                match(TokenType.MP_GEQUAL);
+                break;
+            case MP_LEQUAL: //74 RelationalOperator -> mp_lequal
+                t = TokenType.MP_LEQUAL;
+                printNode(74, true);
+                match(TokenType.MP_LEQUAL);
+                break;
+            case MP_GTHAN: //73 RelationalOperator -> mp_gthan
+                t = TokenType.MP_GTHAN;
+                printNode(73, true);
+                match(TokenType.MP_GTHAN);
+                break;
+            case MP_LTHAN: //72 RelationalOperator -> mp_lthan
+                t = TokenType.MP_LTHAN;
+                printNode(72, true);
+                match(TokenType.MP_LTHAN);
+                break;
+            case MP_EQUAL: //71 RelationalOperator -> mp_equal
+                t = TokenType.MP_EQUAL;
+                printNode(71, true);
+                match(TokenType.MP_EQUAL);
+                break;
+            default:
+                syntaxError("<>, >=, <= , >, <, =");
         }
+        return t;
     }
 
     /**
@@ -857,6 +870,7 @@ public class Parser {
         case MP_FALSE:
         case MP_TRUE:
         case MP_STRING_LIT:
+        case MP_FIXED_LIT:
         case MP_FLOAT_LIT: //added boolean values, string, float
         case MP_LPAREN:
         case MP_NOT:
@@ -937,6 +951,7 @@ public class Parser {
         case MP_FALSE:
         case MP_TRUE:
         case MP_STRING_LIT:
+        case MP_FIXED_LIT:
         case MP_FLOAT_LIT: //added boolean values, string, float
         case MP_LPAREN:
         case MP_NOT:
@@ -993,6 +1008,7 @@ public class Parser {
         case MP_FALSE:
         case MP_TRUE:
         case MP_STRING_LIT:
+        case MP_FIXED_LIT:
         case MP_FLOAT_LIT: //added boolean values, string, float
         case MP_LPAREN:
         case MP_NOT:
@@ -1126,6 +1142,10 @@ public class Parser {
             } else {
                 semanticError("Semantic Error");
             }
+            
+            if (record.getKind() == RecordKind.FUNCTION || record.getKind() == RecordKind.VARIABLE) {
+                r = record.getType();
+            }
             //functionIdentifier();
             
             printBranch();
@@ -1169,6 +1189,12 @@ public class Parser {
             analyzer.gen_lit_push("\"" + lookAhead.getLexeme() + "\"");
             match(TokenType.MP_STRING_LIT);
             r = RecordType.STRING;
+            break;
+        case MP_FIXED_LIT:
+            printNode(113, true);
+            analyzer.gen_lit_push(lookAhead.getLexeme());
+            match(TokenType.MP_FIXED_LIT);
+            r = RecordType.FLOAT;
             break;
         case MP_FLOAT_LIT: //113 Factor -> mp_float_lit
             printNode(113, true);
@@ -1487,8 +1513,7 @@ public class Parser {
             match(TokenType.MP_LPAREN);
             printBranch();
             readParameter();
-            
-            printBranch();
+
             readParameterTail();
             match(TokenType.MP_RPAREN);
             break;
@@ -1512,25 +1537,41 @@ public class Parser {
             break;
         case MP_RPAREN: //43 ReadParameterTail -> &epsilon
             printNode(43, true);
+            lambda();
             break;
         default:
             syntaxError("Read, )");
         }
     }
 
-    public void readParameter()
+    public String readParameter()
     {
+        String lexeme = null;
         switch (lookAhead.getToken())
         {
             case MP_IDENTIFIER: //44 ReadParameter -> VariableIdentifier
                 printNode(44, false);
                 printBranch();
-                variableIdentifier();
+                lexeme = variableIdentifier();
+                SymbolTableRecord record = symbolTableStack.getSymbolInScope((lexeme));
+            
+
+                if (record == null) {
+                    semanticError("Variable '" + lexeme + "' undeclared in this scope.");
+                }
+                int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+                long offset = record.getOffset();
+
+                RecordType r = record.getType();
+
+                analyzer.gen_read_op(r, offset, nestingLevel);
+                printBranch();
 
                 break;
             default:
                 syntaxError("identifier");
         }
+        return lexeme;
     }
 
     public void writeStatement()
@@ -1603,6 +1644,7 @@ public class Parser {
             case MP_FALSE:
             case MP_TRUE:
             case MP_STRING_LIT:
+            case MP_FIXED_LIT:
             case MP_FLOAT_LIT: //added boolean values, string, float
             case MP_LPAREN:
             case MP_NOT:
@@ -1612,6 +1654,7 @@ public class Parser {
                 printNode(48, false);
                 printBranch();
                 ordinalExpression();
+                analyzer.gen_write_op();
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -1620,11 +1663,13 @@ public class Parser {
 
     public void assignmentStatement()
     {
+        RecordType r = null;
         switch (lookAhead.getToken())
         {
             case MP_IDENTIFIER: 
                 
                 String lexeme = variableIdentifier();
+                
                 SymbolTableRecord record = symbolTableStack.getSymbolInScope(lexeme);
                 if (record == null) {
                     semanticError("Variable not declared");
@@ -1632,8 +1677,10 @@ public class Parser {
                 int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
                 
                 match(TokenType.MP_ASSIGN);
-                expression();
-                
+                r = expression();
+                if (r != record.getType()) {
+                    semanticError("Unable to do implicit conversion from " + r + " to " + record.getType() + ".");
+                }
                 analyzer.gen_id_pop(record.getOffset(), nestingLevel);
                 //functionIdentifier();
                 //match(TokenType.MP_ASSIGN);
@@ -1662,37 +1709,42 @@ public class Parser {
         return id;
     }
 
-    public void booleanExpression()
+    public RecordType booleanExpression()
     {
+        RecordType r = null;
         switch (lookAhead.getToken())
-        {
-        case MP_IDENTIFIER: //102 BooleanExpression ->  Expression
-        case MP_FALSE:
-        case MP_TRUE:
-        case MP_STRING_LIT:
-        case MP_FLOAT_LIT: //added boolean values, string, float
-        case MP_LPAREN:
-        case MP_NOT:
-        case MP_INTEGER_LIT:
-        case MP_MINUS:
-        case MP_PLUS:
-            printNode(102, false);
-            printBranch();
-            expression();
-            break;
-        default:
-            syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
+            {
+            case MP_IDENTIFIER: //102 BooleanExpression ->  Expression
+            case MP_FALSE:
+            case MP_TRUE:
+            case MP_STRING_LIT:
+            case MP_FIXED_LIT:
+            case MP_FLOAT_LIT: //added boolean values, string, float
+            case MP_LPAREN:
+            case MP_NOT:
+            case MP_INTEGER_LIT:
+            case MP_MINUS:
+            case MP_PLUS:
+                printNode(102, false);
+                printBranch();
+                r = expression();
+                break;
+            default:
+                syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
-    public void ordinalExpression()
+    public RecordType ordinalExpression()
     {
+        RecordType r = null;
         switch (lookAhead.getToken())
         {
             case MP_IDENTIFIER: //103 OrdinalExpression ->  Expression
             case MP_FALSE:
             case MP_TRUE:
             case MP_STRING_LIT:
+            case MP_FIXED_LIT:
             case MP_FLOAT_LIT: //added boolean values, string, float
             case MP_LPAREN:
             case MP_NOT:
@@ -1701,11 +1753,12 @@ public class Parser {
             case MP_PLUS:
                 printNode(103, false);
                 printBranch();
-                expression();
+                r = expression();
                 break;
             default:
                 syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
     public List<String> identifierList()

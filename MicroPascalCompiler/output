@@ -1,47 +1,56 @@
+br L1
+L2:
 	; do_things start
 add SP #2 SP
 mov D1 -4(SP)
 sub SP #4 D1
 	; activation end
+	; activation end
 push #5
-pop 0(1)
-push 0(1)
+pop 0(D1)
+push 0(D1)
 push #7
 push #6
 muls
 adds
-pop 1(1)
+pop 1(D1)
 	; deactivation start
+mov D1 SP
 mov -4(SP) D1
-sub SP #2 SP
 ret
 	; do_things end
+L3:
 	; stuff start
 add SP #1 SP
 mov D1 -4(SP)
 sub SP #4 D1
 	; activation end
-push #5
-push #7
+	; activation end
+push #5.0
+push #7.0
 divsf
-push #4
-push #2
-muls
-adds
-pop 1(1)
+push #4.0
+push #2.0
+mulsf
+addsf
+pop 1(D1)
+push 1(D1)
+wrts
 	; deactivation start
+mov D1 SP
 mov -4(SP) D1
-sub SP #1 SP
 ret
 	; stuff end
+L1:
 	; do_stuff start
 add SP #1 SP
-mov D0 -3(SP)
-sub SP #3 D0
+sub SP #1 D0
 	; activation end
-push 0(0)
+rdf 0(D0)
+push 0(D0)
+wrts
+push 0(D0)
 	; deactivation start
-mov -3(SP) D0
-sub SP #1 SP
-ret
+mov D0 SP
 	; do_stuff end
+hlt
