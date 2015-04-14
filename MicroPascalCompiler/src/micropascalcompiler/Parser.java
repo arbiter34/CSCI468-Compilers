@@ -18,16 +18,20 @@ public class Parser {
     private final SymbolTableStack symbolTableStack = new SymbolTableStack();
     private final SemanticAnalyzer analyzer;
 
-    public Parser(Scanner scanner, PrintWriter outFile) throws IOException {
+    public Parser(Scanner scanner, PrintWriter outFile, String fileName) throws IOException {
         this.outFile = outFile;
         this.scanner = scanner;
-        this.analyzer = new SemanticAnalyzer(symbolTableStack, "output");
+        this.analyzer = new SemanticAnalyzer(symbolTableStack, fixFileName(fileName) + ".asm");
         lookAhead = scanner.getNextToken();
         lookAhead2 = scanner.getNextToken();
         systemGoal();
         printSymbolTables();
         this.outFile.close();
         System.out.println("Successfully parsed the program.");
+    }
+    
+    private String fixFileName(String fileName) {
+        return fileName.replace("\\.\\w+$", "");
     }
     
     private void printNode(int rule, boolean newLine) {
@@ -729,11 +733,11 @@ public class Parser {
                 
                 SymbolTableRecord record = symbolTableStack.getSymbolInScope(procId);
                 int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
-                long offset = record.getOffset();
                 
                 if (record == null) {
                     semanticError("Procedure '" + procId + "' not declared in this scope.");
                 }
+                long offset = record.getOffset();
                 
                 if (record.getKind() != RecordKind.PROCEDURE) {
                     semanticError("'" + procId + "' is not a valid procedure symbol.");

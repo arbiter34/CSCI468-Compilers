@@ -1,160 +1,60 @@
 br L1
 L2:
-	; do_things start
-add SP #2 SP
-mov D1 -6(SP)
-sub SP #6 D1
+	; fib start
+add SP #0 SP
+mov D1 -3(SP)
+sub SP #3 D1
 	; activation end
-push #5
-pop 4(D1)
-push 4(D1)
-push #7
-push #6
-muls
-adds
-pop 5(D1)
-push #"YAY!!\n"
-pop 1(D0)
-	; deactivation start
-mov D1 SP
-mov 0(SP) D1
-add SP #4 SP
-ret
-	; do_things end
-L3:
-	; stuff start
-add SP #1 SP
-mov D1 -4(SP)
-sub SP #4 D1
-	; activation end
-push #5
-pop 1(D1)
-push #"stuff function var"
-pop 3(D1)
-push 3(D1)
-wrts
-L4:
 push 1(D1)
-push #100
-cmples
-brfs L5
-add SP #1 SP
 push #0
-push #0.0
-call L2
-sub SP #2 SP
-sub SP #1 SP
-push 1(D0)
-wrts
-push 1(D1)
-wrts
-push #": Second Write\n"
-wrts
+cmpeqs
 push 1(D1)
 push #1
-adds
-pop 1(D1)
+cmpeqs
+ors
+brfs L3
+push 1(D1)
+pop 0(D0)
 br L4
-L5:
+L3:
+add SP #1 SP
+push 1(D1)
 push #1
-pop 2(D0)
+subs
+call L2
+sub SP #1 SP
+sub SP #1 SP
+push 0(D0)
+add SP #1 SP
+push 1(D1)
+push #2
+subs
+call L2
+sub SP #1 SP
+sub SP #1 SP
+push 0(D0)
+adds
+pop 0(D0)
+L4:
 	; deactivation start
 mov D1 SP
 mov 0(SP) D1
 add SP #3 SP
 ret
-	; stuff end
+	; fib end
 L1:
-	; do_stuff start
-add SP #3 SP
-sub SP #3 D0
+	; fibonacci start
+add SP #1 SP
+sub SP #1 D0
 	; activation end
-push #20938.000
-pop 0(D0)
-push 0(D0)
-wrts
-push #"\n"
-wrts
-push #0.0
-pop 0(D0)
 add SP #1 SP
 push #10
-call L3
+call L2
 sub SP #1 SP
 sub SP #1 SP
-push 2(D0)
-brfs L6
-push #"stuff returned success\n"
-wrts
-br L7
-L6:
-push #"stuff returned failure\n"
-wrts
-L7:
-push #0.0
-pop 0(D0)
-L8:
 push 0(D0)
-wrts
-push #"Repeat\n"
-wrts
-push 0(D0)
-push #1.0
-addsf
-pop 0(D0)
-push 0(D0)
-push #20.0
-cmpgtsf
-brfs L8
-push #2.0
-pop 0(D0)
-L9:
-push 0(D0)
-push #20.0
-cmplesf
-brfs L10
-push 0(D0)
-wrts
-push #"For\n"
-wrts
-addf 0(D0) #1.0 0(D0)
-br L9
-L10:
-push #20.0
-pop 0(D0)
-L11:
-push 0(D0)
-push #2.0
-cmpgesf
-brfs L12
-push 0(D0)
-wrts
-push #"For\n"
-wrts
-subF 0(D0) #1.0 0(D0)
-br L11
-L12:
-push 0(D0)
-push #-1.0
-mulsf
-pop 0(D0)
-push #9382.0
-push #-1.0
-mulsf
-pop 0(D0)
-push 0(D0)
-push #-1.0
-mulsf
-pop 0(D0)
-push 0(D0)
-wrts
-push #"\n"
-wrts
-push #"YAY Writeln works!"
-wrts
-push #"\n"
 wrts
 	; deactivation start
 mov D0 SP
-	; do_stuff end
+	; fibonacci end
 hlt
