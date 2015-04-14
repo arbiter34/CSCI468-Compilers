@@ -1745,6 +1745,8 @@ public class Parser {
                     
                 printBranch();
                 writeParameterTail();
+                analyzer.gen_lit_push("\"\\n\"");
+                analyzer.gen_write_op();
                 match(TokenType.MP_RPAREN);
                 break;
             default:

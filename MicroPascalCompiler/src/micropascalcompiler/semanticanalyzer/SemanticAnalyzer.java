@@ -271,6 +271,10 @@ public class SemanticAnalyzer {
     {
         out.println("wrtlns");
     }
+    
+    private void writeln() {
+        out.println("wrtln");
+    }
 
     private void readI(String offset)
     {
@@ -563,5 +567,9 @@ public class SemanticAnalyzer {
     
     public void gen_write_op() {
         writeStack();
+    }
+    
+    public void gen_writeln_op() {
+        writeln();
     }
 }

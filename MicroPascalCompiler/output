@@ -134,6 +134,10 @@ wrts
 subF 0(D0) #1.0 0(D0)
 br L11
 L12:
+push #"YAY Writeln works!"
+wrts
+push #"\n"
+wrts
 	; deactivation start
 mov D0 SP
 	; do_stuff end

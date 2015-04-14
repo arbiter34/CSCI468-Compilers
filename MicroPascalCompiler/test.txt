@@ -58,5 +58,7 @@ begin
 	begin
 		Write(test, 'For\n');
 	end;
-	
+
+	Writeln('YAY Writeln works!');
+
 end.
