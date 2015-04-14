@@ -390,6 +390,12 @@ public class SemanticAnalyzer {
         branchFalse(label);
     }
     
+    public void gen_cast_op(RecordType r) {
+        if (r == RecordType.FLOAT) {
+            castStackToF();
+        } 
+    }
+    
     public void gen_mul_op(TokenType t, RecordType r) {
         switch (t) {
             case MP_AND:

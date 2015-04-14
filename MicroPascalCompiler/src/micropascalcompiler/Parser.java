@@ -1004,7 +1004,7 @@ public class Parser {
             TokenType t = optionalSign();
             
             printBranch();
-            r = term();
+            r = term(null);
             
             if (r == RecordType.FLOAT && t == TokenType.MP_MINUS) {
                 analyzer.gen_negate_float();
@@ -1013,7 +1013,7 @@ public class Parser {
             }
             
             printBranch();
-            termTail();
+            termTail(r);
             
             break;
         default:
@@ -1027,45 +1027,51 @@ public class Parser {
      * @param left
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void termTail() {
+    public void termTail(RecordType previousRecordType) {
         RecordType r = null;
         TokenType t = null;
                 
         switch (lookAhead.getToken()) {
-        case MP_COMMA:
-        case MP_RPAREN:
-        case MP_NEQUAL:
-        case MP_GEQUAL:
-        case MP_LEQUAL:
-        case MP_GTHAN:
-        case MP_LTHAN:
-        case MP_EQUAL:
-        case MP_DOWNTO:
-        case MP_TO:
-        case MP_DO:
-        case MP_UNTIL:
-        case MP_ELSE:
-        case MP_THEN:
-        case MP_SCOLON:
-        case MP_END: //79 TermTail -> lambda
-            printNode(79, true);
-            lambda();
-            break;
-        case MP_OR:
-        case MP_MINUS:
-        case MP_PLUS: //78 TermTail -> AddingOperator Term TermTail
-            printNode(78, false);
-            printBranch();
-            t = addingOperator();
-            
-            printBranch();
-            r = term();
-            analyzer.gen_add_op(t, r);
-            printBranch();
-            termTail();
-            break;
-        default:
-            syntaxError("',', ), <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, or, -, +");
+            case MP_COMMA:
+            case MP_RPAREN:
+            case MP_NEQUAL:
+            case MP_GEQUAL:
+            case MP_LEQUAL:
+            case MP_GTHAN:
+            case MP_LTHAN:
+            case MP_EQUAL:
+            case MP_DOWNTO:
+            case MP_TO:
+            case MP_DO:
+            case MP_UNTIL:
+            case MP_ELSE:
+            case MP_THEN:
+            case MP_SCOLON:
+            case MP_END: //79 TermTail -> lambda
+                printNode(79, true);
+                lambda();
+                break;
+            case MP_OR:
+            case MP_MINUS:
+            case MP_PLUS: //78 TermTail -> AddingOperator Term TermTail
+                printNode(78, false);
+                printBranch();
+                String addOp = lookAhead.getLexeme();
+                t = addingOperator();
+
+                printBranch();
+                r = term(previousRecordType);
+                
+                if ((r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
+                        || (previousRecordType == RecordType.STRING || previousRecordType == RecordType.BOOLEAN))) {
+                    semanticError("Invalid operation. '" + addOp + "' does not apply to " + previousRecordType + " and " + r + ".");
+                }
+                analyzer.gen_add_op(t, r);
+                printBranch();
+                termTail(r);
+                break;
+            default:
+                syntaxError("',', ), <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, or, -, +");
         }
     }
 
@@ -1133,7 +1139,7 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public RecordType term() {
+    public RecordType term(RecordType previousRecordType) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
@@ -1149,10 +1155,10 @@ public class Parser {
             printBranch();
             
                       
-            r = factor();
+            r = factor(previousRecordType);
             
             printBranch();
-            factorTail();
+            factorTail(r);
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer");
@@ -1165,7 +1171,7 @@ public class Parser {
      * @param left
      * @return SemanticRec RecordType.LITERAL or RecordType.IDENTIFIER
      */
-    public void factorTail() {
+    public void factorTail(RecordType previousRecordType) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
             case MP_COMMA:
@@ -1198,13 +1204,18 @@ public class Parser {
                 printNode(87, false);
                 
                 printBranch();
+                String multOp = lookAhead.getLexeme();
                 TokenType t = multiplyingOperator();
                 
                 printBranch();
-                r = factor();
+                r = factor(previousRecordType);
+                if ((r != null && previousRecordType != null) && ((r == RecordType.STRING || r == RecordType.BOOLEAN) 
+                        || (previousRecordType == RecordType.STRING || previousRecordType == RecordType.BOOLEAN))) {
+                    semanticError("Invalid operation. '" + multOp + "' does not apply to " + previousRecordType + " and " + r + ".");
+                }
                 analyzer.gen_mul_op(t, r);
                 printBranch();
-                factorTail();
+                factorTail(previousRecordType);
                 break;
             default:
                 syntaxError("',', ), or, -, +, <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, and, mod, div, / , *");
@@ -1254,7 +1265,7 @@ public class Parser {
      * @param formalParam
      * @return SemanticRec RecordType.IDENTIFIER or RecordType.LITERAL
      */
-    public RecordType factor() {
+    public RecordType factor(RecordType previousRecordType) {
         RecordType r = null;
         switch (lookAhead.getToken()) {
         case MP_IDENTIFIER:
@@ -1264,9 +1275,12 @@ public class Parser {
             String lexeme = variableIdentifier();
             SymbolTableRecord record = symbolTableStack.getSymbolInScope((lexeme));
             if (record == null) {
-                semanticError("Identifier not declared");
+                semanticError("Identifier '" + lexeme + "' not declared");
             }
             int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+            if (previousRecordType == RecordType.INTEGER && record.getType() == RecordType.FLOAT) {
+                analyzer.gen_cast_op(record.getType());
+            } 
             if (record.getKind() == RecordKind.VARIABLE) {
                 analyzer.gen_id_push(record.getOffset(), nestingLevel);
             } else if (record.getKind() == RecordKind.FUNCTION) {
@@ -1301,12 +1315,18 @@ public class Parser {
             } else {
                 semanticError("Invalid factor");
             }
-            
-            if (record.getKind() == RecordKind.FUNCTION || record.getKind() == RecordKind.VARIABLE) {
-                r = record.getType();
+
+            r = record.getType();
+
+            if (previousRecordType == RecordType.FLOAT && record.getType() == RecordType.INTEGER) {
+                analyzer.gen_cast_op(previousRecordType);
+                r = RecordType.FLOAT;
+            } else if (previousRecordType != null && record.getType() != null && previousRecordType != record.getType()) {
+                semanticError("Incompatible types " + previousRecordType + " and " + record.getType() + ".");
             }
             
-            //functionIdentifier();
+            
+
             
             printBranch();
 
@@ -1323,11 +1343,14 @@ public class Parser {
             printNode(95, false);
             printBranch();
             match(TokenType.MP_NOT);
-            r = factor();
+            r = factor(previousRecordType);
             break;
         case MP_INTEGER_LIT: //93 Factor -> mp_integer_lit
             printNode(93, true);
             analyzer.gen_lit_push(lookAhead.getLexeme());
+            if (previousRecordType == RecordType.FLOAT) {
+                analyzer.gen_cast_op(previousRecordType);
+            }
             match(TokenType.MP_INTEGER_LIT);
             r = RecordType.INTEGER;
             break;
@@ -1352,12 +1375,18 @@ public class Parser {
             break;
         case MP_FIXED_LIT:
             printNode(113, true);
+            if (previousRecordType == RecordType.INTEGER) {
+                analyzer.gen_cast_op(RecordType.FLOAT);
+            }            
             analyzer.gen_lit_push(lookAhead.getLexeme());
             match(TokenType.MP_FIXED_LIT);
             r = RecordType.FLOAT;
             break;
         case MP_FLOAT_LIT: //113 Factor -> mp_float_lit
             printNode(113, true);
+            if (previousRecordType == RecordType.INTEGER) {
+                analyzer.gen_cast_op(RecordType.FLOAT);
+            }
             analyzer.gen_lit_push(lookAhead.getLexeme());
             match(TokenType.MP_FLOAT_LIT);
             r = RecordType.FLOAT;
@@ -1840,7 +1869,9 @@ public class Parser {
                 
                 match(TokenType.MP_ASSIGN);
                 r = expression();
-                if (r != record.getType()) {
+                if (record.getType() == RecordType.FLOAT && r == RecordType.INTEGER) {
+                    analyzer.gen_cast_op(record.getType());
+                } else if (r != record.getType()) {
                     semanticError("Unable to do implicit cast from " + r + " to " + record.getType() + ".");
                 }
                 analyzer.gen_id_pop(record.getOffset(), nestingLevel);

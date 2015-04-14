@@ -1,67 +1,10 @@
 program do_stuff;
 var
 	test: Float;
-
-function do_things(xz: integer; yz: float): String;
-var
-	x, y: integer;
-begin;
-	x := 5;
-	y := x + 7 * 6;
-	do_things := 'YAY!!\n';
-end;
-
-
-
-
-function stuff(x: Integer): boolean;
-var
-	test: String;
-begin;
-	x := 5;
-	test := 'stuff function var';
-	Write(test);
-	while (x <= 100) do
-	begin
-		Write(do_things(0, 0.0), x, ': Second Write\n');
-		x := x + 1;
-	end;
-	stuff := true;
-end;
-
+    testint: integer;
+    testString: string;
+    testBool: boolean;
 begin
-	test := 20938.000;
-	Write(test);
-	Write('\n');
 
-	test := 0.0;
-
-
-	if (stuff(10)) then
-		Write('stuff returned success\n')
-	else
-		Write('stuff returned failure\n');
-	test := 0.0;
-	repeat
-	begin
-		Write(test, 'Repeat\n');
-		test := test + 1.0;
-	end;
-	until (test > 20.0);
-
-	for test := 2.0 to 20.0 do
-	begin
-		Write(test, 'For\n');
-	end;
-
-	for test := 20.0 downto 2.0 do
-	begin
-		Write(test, 'For\n');
-	end;
-	test := -test;
-	test := -9382.0;
-	test := -test;
-	Writeln(test);
-	Writeln('YAY Writeln works!');
-
+    test := 5.0 + 2;
 end.
