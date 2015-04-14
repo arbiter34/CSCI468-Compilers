@@ -27,12 +27,11 @@ begin
 
 	test := 0.0;
 
-	repeat
+	for test := 1.0 to 100.0 do
 	begin
 		Write(test, '\n');
 		test := test + 1.0;
 	end;
-	until (test = 100.0);
+	
 
-	Write(test);
 end.

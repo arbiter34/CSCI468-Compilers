@@ -76,6 +76,17 @@ public class SemanticAnalyzer {
     {
         out.println("add " + src1 + " " + src2 + " " + dst);
     }
+    
+        /**
+     * 
+     * @param src1
+     * @param src2
+     * @param dst
+     */
+    private void addF(String src1, String src2, String dst)
+    {
+        out.println("addf " + src1 + " " + src2 + " " + dst);
+    }
 
     /**
      * 
@@ -478,6 +489,14 @@ public class SemanticAnalyzer {
     
     public String getNestingLevelString(int nestingLevel) {
         return "(D" + Integer.toString(nestingLevel) + ")";
+    }
+    
+    public void gen_id_increment(RecordType r, long offset, int nestingLevel) {
+        if (r == RecordType.FLOAT) {
+            addF(Long.toString(offset) + getNestingLevelString(nestingLevel), "#1.0", Long.toString(offset) + getNestingLevelString(nestingLevel));
+        } else if (r == RecordType.INTEGER) {
+            add(Long.toString(offset) + getNestingLevelString(nestingLevel), "#1", Long.toString(offset) + getNestingLevelString(nestingLevel));
+        }
     }
     
     public void gen_id_push(long offset, int nestingLevel) {

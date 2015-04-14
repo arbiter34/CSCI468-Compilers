@@ -52,7 +52,13 @@ push #"\n"
 wrts
 push #0.0
 pop 0(D0)
+push #1.0
+pop 0(D0)
 L4:
+push 0(D0)
+push #100.0
+cmplesf
+brfs L5
 push 0(D0)
 wrts
 push #"\n"
@@ -61,12 +67,9 @@ push 0(D0)
 push #1.0
 addsf
 pop 0(D0)
-push 0(D0)
-push #100.0
-cmpeqsf
-brfs L4
-push 0(D0)
-wrts
+addf 0(D0) #1.0 0(D0)
+br L4
+L5:
 	; deactivation start
 mov D0 SP
 	; do_stuff end

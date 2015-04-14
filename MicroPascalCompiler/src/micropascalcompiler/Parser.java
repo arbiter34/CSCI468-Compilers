@@ -564,17 +564,53 @@ public class Parser {
             printNode(56, false);
             printBranch();
             match(TokenType.MP_FOR);
-            controlVariable();            
+            String lexeme = controlVariable();     
             
+            SymbolTableRecord record = symbolTableStack.getSymbolInScope(lexeme);
+            int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
+            long offset = record.getOffset();
+           
             printBranch();
             match(TokenType.MP_ASSIGN);
             
             printBranch();
-            initialValue();
+                        
+            RecordType r = initialValue();
+            
+            if (record.getType() != r) {
+                semanticError("Invalid implicit cast from " + r + " to " + record.getType() + ". Invalid initialValue in for loop.");
+            }
+            
+            String forStartLabel = LabelMaker.getNextLabel();
+            
+            String forEndLabel = LabelMaker.getNextLabel();
+            
+            analyzer.gen_id_pop(offset, nestingLevel);  //pop initial value into control var
+            
+            analyzer.gen_label(forStartLabel);
+            
+            analyzer.gen_id_push(offset, nestingLevel);
+            
+            TokenType forDirection = stepValue();
+            
+            r = finalValue();
+            
+            analyzer.gen_bool_expr(TokenType.MP_LEQUAL, r);
+            analyzer.gen_branch_false(forEndLabel);
+            
             match(TokenType.MP_DO);
+            
+            if (r != record.getType()) {
+                semanticError("Invalid implicit cast from " + r + " to " + record.getType() + ". Invalid finalValue in for loop.");
+            }
+            
+            
             
             printBranch();
             statement();
+            analyzer.gen_id_increment(r, offset, nestingLevel);
+            analyzer.gen_branch_unconditional(forStartLabel);
+            analyzer.gen_label(forEndLabel);
             break;
         default:
             syntaxError("for");
@@ -587,17 +623,19 @@ public class Parser {
         
         switch (lookAhead.getToken())
         {
-        case MP_IDENTIFIER: //57 ControlVariable -> VariableIdentifier
-            printNode(57, true);            variableIdentifier();
-            break;
-        default:
-            syntaxError("identifier");
+            case MP_IDENTIFIER: //57 ControlVariable -> VariableIdentifier
+                printNode(57, true);            
+                id = variableIdentifier();
+                break;
+            default:
+                syntaxError("identifier");
         }
         return id;
     }
 
-    public void initialValue()
+    public RecordType initialValue()
     {
+        RecordType r = null;
         switch (lookAhead.getToken())
         {
         case MP_IDENTIFIER:
@@ -613,50 +651,57 @@ public class Parser {
         case MP_PLUS: //58 InitialValue -> OrdinalExpression
             printNode(58, false);
             printBranch();
-            ordinalExpression();
+            r = ordinalExpression();
             break;
         default:
             syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
-    public void stepValue()
+    public TokenType stepValue()
     {
+        TokenType t = null;
         switch (lookAhead.getToken())
         {
         case MP_TO: //59 StepValue -> mp_to
+            t = TokenType.MP_TO;
             printNode(59, true);
             match(TokenType.MP_TO);
             break;
         case MP_DOWNTO: //60 StepValue -> mp_downto
+            t = TokenType.MP_DOWNTO;
             printNode(60, true);
             match(TokenType.MP_DOWNTO);
             break;
         default:
             syntaxError("to, downto");
         }
+        return t;
     }
 
-    public void finalValue() {
+    public RecordType finalValue() {
+        RecordType r = null;
         switch (lookAhead.getToken()) {
-        case MP_IDENTIFIER:
-        case MP_FALSE:
-        case MP_TRUE:
-        case MP_STRING_LIT:
-        case MP_FIXED_LIT:
-        case MP_FLOAT_LIT: //added boolean values, string, float
-        case MP_LPAREN:
-        case MP_NOT:
-        case MP_INTEGER_LIT:
-        case MP_MINUS:
-        case MP_PLUS: //61 FinalValue -> OrdinalExpression
-            printNode(61, false);
-            printBranch();
-            ordinalExpression();
-            break;
-        default:
-            syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
+            case MP_IDENTIFIER:
+            case MP_FALSE:
+            case MP_TRUE:
+            case MP_STRING_LIT:
+            case MP_FIXED_LIT:
+            case MP_FLOAT_LIT: //added boolean values, string, float
+            case MP_LPAREN:
+            case MP_NOT:
+            case MP_INTEGER_LIT:
+            case MP_MINUS:
+            case MP_PLUS: //61 FinalValue -> OrdinalExpression
+                printNode(61, false);
+                printBranch();
+                r = ordinalExpression();
+                break;
+            default:
+                syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
         }
+        return r;
     }
 
     public void procedureStatement() {
