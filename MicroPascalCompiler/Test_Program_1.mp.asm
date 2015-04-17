@@ -179,12 +179,12 @@ mov D1 -3(SP)
 sub SP #3 D1
 	; activation end
 push #5
-push 1(D1)
+push @1(D1)
 adds
-pop 1(D1)
+pop @1(D1)
 push #"Variable x should be changed to "
 wrts
-push 1(D1)
+push @1(D1)
 wrts
 push #"\n"
 wrts
@@ -202,7 +202,7 @@ sub SP #3 D2
 	; activation end
 push #"In refCheck 3 value is: "
 wrts
-push 1(D2)
+push @1(D2)
 wrts
 push #"\n"
 wrts
@@ -222,19 +222,20 @@ add SP #1 SP
 mov D1 -6(SP)
 sub SP #6 D1
 	; activation end
-push 2(D1)
-push 3(D1)
+push @2(D1)
+push @3(D1)
 addsf
-pop 2(D1)
+pop @2(D1)
 push #"X in refcheck2 is "
 wrts
-push 2(D1)
+push @2(D1)
 wrts
 push #"\n"
 wrts
 add SP #1 SP
-mov 3(D1) 0(SP)
-add SP #1 SP
+push D1
+push #3
+adds
 call L15
 sub SP #1 SP
 sub SP #1 SP
@@ -411,8 +412,9 @@ wrts
 push #"\n"
 wrts
 add SP #1 SP
-mov 0(D0) 0(SP)
-add SP #1 SP
+push D0
+push #0
+adds
 call L13
 sub SP #1 SP
 sub SP #1 SP
@@ -434,10 +436,12 @@ add SP #1 SP
 push #10
 push #3
 divs
-mov 2(D0) 0(SP)
-add SP #1 SP
-mov 2(D0) 0(SP)
-add SP #1 SP
+push D0
+push #2
+adds
+push D0
+push #2
+adds
 call L14
 sub SP #3 SP
 sub SP #1 SP

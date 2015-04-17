@@ -1,7 +1,6 @@
 mov sp d0
 add sp #3 sp
-mov 0(d0) 0(sp)
-prts
-add #1 #2 0(sp)
+mov d0 1(d0)
+mov #10 @1(d0)
 prts
 hlt

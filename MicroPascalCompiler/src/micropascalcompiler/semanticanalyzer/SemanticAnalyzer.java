@@ -545,12 +545,13 @@ public class SemanticAnalyzer {
     }
     
     public void gen_id_addr_push(long offset, int nestingLevel) {
-        move(Long.toString(offset) + getNestingLevelString(nestingLevel), "0(SP)");
-        add("SP", "#1", "SP");
+        push("D" + nestingLevel);
+        push("#" + Long.toString(offset));
+        addStackI();
     }
     
     public void gen_id_deref_push(long offset, int nestingLevel) {
-        push("" + Long.toString(offset) + getNestingLevelString(nestingLevel));
+        push("@" + Long.toString(offset) + getNestingLevelString(nestingLevel));
     }
     
     public void gen_id_pop(long offset, int nestingLevel) {
@@ -558,7 +559,7 @@ public class SemanticAnalyzer {
     }
     
     public void gen_id_deref_pop(long offset, int nestingLevel) {
-        pop("" + Long.toString(offset) + getNestingLevelString(nestingLevel));
+        pop("@" + Long.toString(offset) + getNestingLevelString(nestingLevel));
     }
     
     public void gen_lit_push(String value) {
