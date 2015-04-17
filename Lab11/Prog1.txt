@@ -1,0 +1,73 @@
+br L1
+L2:
+	; fred start
+add SP #0 SP
+mov D1 -2(SP)
+sub SP #2 D1
+	; activation end
+push 0(D0)
+push #1
+adds
+pop 0(D0)
+	; deactivation start
+mov D1 SP
+mov 0(SP) D1
+add SP #2 SP
+ret
+	; fred end
+L1:
+	; program1 start
+add SP #2 SP
+sub SP #2 D0
+	; activation end
+rd 0(D0)
+push 0(D0)
+wrts
+push #"\n"
+wrts
+add SP #1 SP
+call L2
+sub SP #0 SP
+sub SP #1 SP
+push 0(D0)
+wrts
+	; deactivation start
+mov D0 SP
+	; program1 end
+hlt
+
+
+Loading File: ../../Lab11/Prog1.mp
+
+
+Scope Name    Nesting Level    Label
+fred           1            l2
+
+Lexeme   Type    Kind    Mode    Size    Parameters    Offset
+fredreg	null	REG_OR_RA	null	0	0	0
+fredra	null	REG_OR_RA	null	0	0	1
+
+
+
+
+Scope Name    Nesting Level    Label
+program1           0            l1
+
+Lexeme   Type    Kind    Mode    Size    Parameters    Offset
+n	INTEGER	VARIABLE	null	0	0	0
+fred	null	PROCEDURE	null	0	0	1
+
+Successfully parsed the program.
+Done!
+
+
+arbiter34@arbiter-ubuntu-toshi:~/school-workspace/CSCI468/CSCI468-Compilers/Lab11$ ../MicroPascalCompiler/esus_execute ./Prog1.mp.asm
+No vm.config file included. Using defaults defined in uconfig.c
+     uMachine  Interpreter     
+ (-*-)  [VERSION 2.0DV]  (-*-) 
+-------------------------------
+5
+5
+6-------------------------------
+ (-*-)  [VERSION 2.0DV]  (-*-) 
+     uMachine  Interpreter     
