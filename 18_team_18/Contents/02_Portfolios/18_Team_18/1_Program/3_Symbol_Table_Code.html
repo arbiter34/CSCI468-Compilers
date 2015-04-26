@@ -37,7 +37,7 @@
   <div id="headMatter">
     <span id="headTitle1">
       <!-- InstanceBeginEditable name="Header" -->
-        Team 0
+        Team 18
 	  <!-- InstanceEndEditable --> 
     </span>
     <span id="headTitle2">
@@ -83,9 +83,435 @@ Click <a href="../../../01_Introduction/2_Project_Specifications/3_Symbol_Table_
 
 <h2>Source Listing</h2>
 <pre class="prettyprint" ><code class="language-java">
-Replace these lines with your symbol table code.  
-BE SURE THAT THERE ARE NO POORLY WRAPPED LINES,
-AND THAT YOUR CODE IS READABLE, AND THAT IT FITS WITHIN THE BOUNDARIES.</code></pre>
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+public class SymbolTable {
+  private LinkedHashMap<String, SymbolTableRecord> symbolTable;
+
+  private int nestingLevel;
+
+  private String label;
+
+  private String scopeName;
+
+  private long tableSize;
+
+  private int parameterCount;
+
+  private int variableCount;
+
+  public SymbolTable(String scopeName, String label, int nestingLevel) {
+    symbolTable = new LinkedHashMap<>();
+    this.nestingLevel = nestingLevel;
+    this.label = label;
+    this.scopeName = scopeName;
+    this.tableSize = 0;
+    this.variableCount = 0;
+    this.parameterCount = 0;
+  }
+
+  public void print() {
+    System.out.println("\n\nScope Name    Nesting Level    Label");
+    System.out.println(this.scopeName + "           " + this.nestingLevel
+        + "            " + this.label);
+    System.out
+        .println("\nLexeme   Type    Kind    Mode    Size    Parameters    Offset");
+    for (String key : symbolTable.keySet()) {
+      SymbolTableRecord r = symbolTable.get(key);
+      int numParams = r.getParameters() == null ? 0 : r.getParameters()
+          .size();
+      System.out.println(r.getLexeme() + "\t" + r.getType() + "\t"
+          + r.getKind() + "\t" + r.getMode() + "\t" + r.getSize()
+          + "\t" + numParams + "\t" + r.getOffset());
+    }
+    System.out.print("\n\n");
+  }
+
+  public void insert(SymbolTableRecord rec) {
+
+    rec.setOffset(this.tableSize);
+    long recDataSize;
+    if (rec.getKind() == RecordKind.VARIABLE) {
+      recDataSize = DataSize.size[rec.getType().ordinal()];
+      if (rec.getMode() == null) {
+        this.variableCount++;
+      } else {
+        this.parameterCount++;
+      }
+    } else if (rec.getKind() == RecordKind.FUNCTION
+        || rec.getKind() == RecordKind.PROCEDURE) {
+      this.variableCount++;
+      recDataSize = DataSize.size[4];
+    } else if (rec.getKind() == RecordKind.REG_OR_RA) {
+      recDataSize = 1;
+    } else {
+      recDataSize = 0;
+    }
+    this.tableSize += recDataSize;
+    symbolTable.put(rec.getLexeme(), rec);
+  }
+
+  public String getScopeName() {
+    return scopeName;
+  }
+
+  public void setScopeName(String scopeName) {
+    this.scopeName = scopeName.toLowerCase();
+  }
+
+  public boolean exists(String key) {
+    return this.symbolTable.containsKey(key.toLowerCase());
+  }
+
+  public int getNestingLevel() {
+    return nestingLevel;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public SymbolTableRecord getRecord(String key) {
+    return this.symbolTable.get(key.toLowerCase());
+  }
+
+  public RecordKind getRecordKind(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getKind();
+  }
+
+  public RecordType getRecordType(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getType();
+  }
+
+  public String getRecordLexeme(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getLexeme();
+  }
+
+  public RecordMode getRecordMode(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getMode();
+  }
+
+  public int getRecordSize(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getSize();
+  }
+
+  public ArrayList<RecordParameter> getRecordParameters(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getParameters();
+  }
+
+  public long getRecordOffset(String key) {
+    return this.symbolTable.get(key.toLowerCase()).getOffset();
+  }
+
+  public int getVariableCount() {
+    return this.variableCount;
+  }
+
+  public int getParameterCount() {
+    return this.parameterCount;
+  }
+
+  public int getSize() {
+    int size = 0;
+    for (String key : symbolTable.keySet()) {
+      size++;
+    }
+    return size;
+  }
+}
+
+
+
+import java.util.ArrayList;
+
+public class SymbolTableRecord {
+  private String lexeme;
+  private RecordType type;
+  private RecordKind kind;
+  private RecordMode mode;
+  private int size;
+  private ArrayList<RecordParameter> parameters;
+  private long offset;
+  private String label;
+
+  public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind,
+      RecordMode mode, ArrayList<RecordParameter> parameters) {
+    this.lexeme = lexeme;
+    this.type = type;
+    this.kind = kind;
+    this.mode = mode;
+    this.parameters = parameters;
+
+    this.offset = 0;
+    this.size = 0;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind,
+      RecordMode mode, ArrayList<RecordParameter> parameters, String label) {
+    this.lexeme = lexeme;
+    this.type = type;
+    this.kind = kind;
+    this.mode = mode;
+    this.parameters = parameters;
+
+    this.offset = 0;
+    this.size = 0;
+  }
+
+  public String getLexeme() {
+    return lexeme;
+  }
+
+  public void setLexeme(String lexeme) {
+    this.lexeme = lexeme;
+  }
+
+  public RecordType getType() {
+    return type;
+  }
+
+  public void setType(RecordType type) {
+    this.type = type;
+  }
+
+  public RecordKind getKind() {
+    return kind;
+  }
+
+  public void setKind(RecordKind kind) {
+    this.kind = kind;
+  }
+
+  public RecordMode getMode() {
+    return mode;
+  }
+
+  public void setMode(RecordMode mode) {
+    this.mode = mode;
+  }
+
+  public int getSize() {
+    return size;
+  }
+
+  public void setSize(int size) {
+    this.size = size;
+  }
+
+  public ArrayList<RecordParameter> getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(ArrayList<RecordParameter> parameters) {
+    this.parameters = parameters;
+  }
+
+  public long getOffset() {
+    return offset;
+  }
+
+  public void setOffset(long offset) {
+    this.offset = offset;
+  }
+}
+
+
+import java.util.Stack;
+
+public class SymbolTableStack {
+  private Stack<SymbolTable> stack = null;
+  private int nestingLevel = 0;
+  private int previousRecordNestingLevel = -1;
+
+  public int getPreviousRecordNestingLevel() {
+    int ret = previousRecordNestingLevel;
+    previousRecordNestingLevel = -1;
+    return ret;
+  }
+
+  public SymbolTableStack() {
+    stack = new Stack<SymbolTable>();
+  }
+
+  public void generateSymbolTable(String scopeName, String label) {
+    stack.push(new SymbolTable(scopeName.toLowerCase(),
+        label.toLowerCase(), nestingLevel));
+    nestingLevel++;
+  }
+
+  public void removeSymbolTable() {
+    stack.pop();
+    nestingLevel--;
+  }
+
+  public void print() {
+    for (SymbolTable st : stack) {
+      st.print();
+      System.out.println("");
+    }
+  }
+
+  public SymbolTable getCurrentTable() {
+    return stack.peek();
+  }
+
+  public void printCurrentTable() {
+    stack.peek().print();
+  }
+
+  public boolean symbolExistsInLocalScope(String symbol) {
+    symbol = symbol.toLowerCase();
+    if (stack.empty()) {
+      return false;
+    }
+    return stack.peek().exists(symbol);
+  }
+
+  public boolean scopeExists(String scopeName) {
+    scopeName = scopeName.toLowerCase();
+    if (stack.empty()) {
+      return false;
+    }
+    int depth = stack.indexOf(stack.peek());
+    for (int i = depth; i >= 0; i--) {
+      if (stack.get(i).getScopeName().equalsIgnoreCase(scopeName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public SymbolTableRecord getSymbolInScope(String symbol) {
+    symbol = symbol.toLowerCase();
+    if (stack.empty()) {
+      return null;
+    }
+    int depth = stack.indexOf(stack.peek());
+    for (int i = depth; i >= 0; i--) {
+      if (stack.get(i).exists(symbol)) {
+        previousRecordNestingLevel = stack.get(i).getNestingLevel();
+        return stack.get(i).getRecord(symbol);
+      }
+    }
+    return null;
+  }
+
+  public void insertSymbolInScope(SymbolTableRecord rec) {
+    if (!symbolExistsInLocalScope(rec.getLexeme().toLowerCase())) {
+      rec.setLexeme(rec.getLexeme().toLowerCase());
+      stack.peek().insert(rec);
+    }
+  }
+
+  public String getScopeLabel(String scopeName) {
+    scopeName = scopeName.toLowerCase();
+    if (stack.empty()) {
+      return null;
+    }
+    int depth = stack.indexOf(stack.peek());
+    for (int i = depth; i >= 0; i--) {
+      if (stack.get(i).getScopeName() == scopeName) {
+        previousRecordNestingLevel = stack.get(i).getNestingLevel();
+        return stack.get(i).getLabel();
+      }
+    }
+    return null;
+  }
+
+}
+
+
+public enum Type {
+    INTEGER,
+    FLOAT,
+    BOOLEAN,
+    STRING
+}
+
+public enum RecordType {
+
+    INTEGER,
+    FLOAT,
+    BOOLEAN,
+    STRING
+}
+
+
+public class RecordParameter {
+  private String lexeme;
+  private RecordMode mode;
+  private RecordType type;
+
+  public RecordParameter(String lexeme, RecordMode mode, 
+      RecordType type) {
+    this.lexeme = lexeme;
+    this.mode = mode;
+    this.type = type;
+  }
+
+  public String getLexeme() {
+    return lexeme;
+  }
+
+  public void setLexeme(String lexeme) {
+    this.lexeme = lexeme;
+  }
+
+  public RecordMode getMode() {
+    return mode;
+  }
+
+  public void setMode(RecordMode mode) {
+    this.mode = mode;
+  }
+
+  public RecordType getType() {
+    return type;
+  }
+
+  public void setType(RecordType type) {
+    this.type = type;
+  }
+}
+
+public enum RecordMode {
+    VALUE,
+    
+    VARIABLE
+}
+
+
+public enum RecordKind {
+    VARIABLE,
+    
+    PROCEDURE,
+    
+    FUNCTION,
+    
+    REG_OR_RA
+}
+
+
+public class DataSize {
+    public static int size[] = {
+        1,      //RecordType.INTEGER
+        1,      //RecordType.FLOAT
+        1,      //RecordType.BOOLEAN
+        1,      //RecordType.STRING
+        1       //Procedure/Function
+        
+    };
+}
+</code></pre>
 </code></pre>
 <!-- InstanceEndEditable -->
 
