@@ -1,3 +1,6 @@
+/*
+ * Stuff
+ */
 package micropascalcompiler;
 
 import fsa.*;
@@ -6,6 +9,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ *
+ * @author arbiter34
+ */
 public class Scanner {
 	private String fileName;
 	private final Dispatcher dispatcher;
