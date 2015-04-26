@@ -12,100 +12,100 @@ import java.util.ArrayList;
  * @author arbiter34
  */
 public class SymbolTableRecord {
-    private String lexeme;
-    private RecordType type;
-    private RecordKind kind;
-    private RecordMode mode;
-    private int size;
-    private ArrayList<RecordParameter> parameters;
-    private long offset;
-    private String label;
-    
-    public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters) {
-        this.lexeme = lexeme;
-        this.type = type;
-        this.kind = kind;
-        this.mode = mode;
-        this.parameters = parameters;
-        
-        
-        this.offset = 0;
-        this.size = 0;
-    }
+	private String lexeme;
+	private RecordType type;
+	private RecordKind kind;
+	private RecordMode mode;
+	private int size;
+	private ArrayList<RecordParameter> parameters;
+	private long offset;
+	private String label;
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+	public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind,
+			RecordMode mode, ArrayList<RecordParameter> parameters) {
+		this.lexeme = lexeme;
+		this.type = type;
+		this.kind = kind;
+		this.mode = mode;
+		this.parameters = parameters;
 
-    public String getLabel() {
-        return label;
-    }
-    
-    public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind, RecordMode mode, ArrayList<RecordParameter> parameters, String label) {
-        this.lexeme = lexeme;
-        this.type = type;
-        this.kind = kind;
-        this.mode = mode;
-        this.parameters = parameters;
-        
-        
-        this.offset = 0;
-        this.size = 0;
-    }
+		this.offset = 0;
+		this.size = 0;
+	}
 
-    public String getLexeme() {
-        return lexeme;
-    }
+	public void setLabel(String label) {
+		this.label = label;
+	}
 
-    public void setLexeme(String lexeme) {
-        this.lexeme = lexeme;
-    }
+	public String getLabel() {
+		return label;
+	}
 
-    public RecordType getType() {
-        return type;
-    }
+	public SymbolTableRecord(String lexeme, RecordType type, RecordKind kind,
+			RecordMode mode, ArrayList<RecordParameter> parameters, String label) {
+		this.lexeme = lexeme;
+		this.type = type;
+		this.kind = kind;
+		this.mode = mode;
+		this.parameters = parameters;
 
-    public void setType(RecordType type) {
-        this.type = type;
-    }
+		this.offset = 0;
+		this.size = 0;
+	}
 
-    public RecordKind getKind() {
-        return kind;
-    }
+	public String getLexeme() {
+		return lexeme;
+	}
 
-    public void setKind(RecordKind kind) {
-        this.kind = kind;
-    }
+	public void setLexeme(String lexeme) {
+		this.lexeme = lexeme;
+	}
 
-    public RecordMode getMode() {
-        return mode;
-    }
+	public RecordType getType() {
+		return type;
+	}
 
-    public void setMode(RecordMode mode) {
-        this.mode = mode;
-    }
+	public void setType(RecordType type) {
+		this.type = type;
+	}
 
-    public int getSize() {
-        return size;
-    }
+	public RecordKind getKind() {
+		return kind;
+	}
 
-    public void setSize(int size) {
-        this.size = size;
-    }
+	public void setKind(RecordKind kind) {
+		this.kind = kind;
+	}
 
-    public ArrayList<RecordParameter> getParameters() {
-        return parameters;
-    }
+	public RecordMode getMode() {
+		return mode;
+	}
 
-    public void setParameters(ArrayList<RecordParameter> parameters) {
-        this.parameters = parameters;
-    }
+	public void setMode(RecordMode mode) {
+		this.mode = mode;
+	}
 
-    public long getOffset() {
-        return offset;
-    }
+	public int getSize() {
+		return size;
+	}
 
-    public void setOffset(long offset) {
-        this.offset = offset;
-    }
+	public void setSize(int size) {
+		this.size = size;
+	}
+
+	public ArrayList<RecordParameter> getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(ArrayList<RecordParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	public long getOffset() {
+		return offset;
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
 }

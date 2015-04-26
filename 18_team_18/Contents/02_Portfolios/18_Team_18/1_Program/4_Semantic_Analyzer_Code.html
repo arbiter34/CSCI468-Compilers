@@ -37,7 +37,7 @@
   <div id="headMatter">
     <span id="headTitle1">
       <!-- InstanceBeginEditable name="Header" -->
-        Team 0
+        Team 18
 	  <!-- InstanceEndEditable --> 
     </span>
     <span id="headTitle2">
@@ -84,9 +84,665 @@ Click <a href="../../../01_Introduction/2_Project_Specifications/4_Semantic_Anal
 <h2>Source Listing</h2>
 
 <pre class="prettyprint" ><code class="language-java">
-Replace these lines with your semantic analyzer code.  
-BE SURE THAT THERE ARE NO POORLY WRAPPED LINES,
-AND THAT YOUR CODE IS READABLE, AND THAT IT FITS WITHIN THE BOUNDARIES.
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import micropascalcompiler.symboltable.SymbolTable;
+import micropascalcompiler.symboltable.SymbolTableStack;
+import micropascalcompiler.TokenType;
+import micropascalcompiler.symboltable.*;
+
+public class SemanticAnalyzer {
+  private PrintWriter out;
+  private SymbolTableStack symbolTableStack;
+
+  public SemanticAnalyzer(SymbolTableStack stack, String fileName) {
+    this.symbolTableStack = stack;
+    try {
+      out = new PrintWriter(new FileOutputStream(fileName), true);
+    } catch (Exception e) {
+      System.out.println("Whoops! Couldn't open output file.");
+      System.exit(1);
+    }
+  }
+
+  /*
+   * VM ASM methods section begin
+   */
+
+  /**
+   * Pushes the value at the memory location to the stack
+   * 
+   * @param memLoc
+   *            string with format from VM definition e.g (0(D0), #"string",
+   *            etc)
+   */
+  private void push(String memLoc) {
+    out.println("push " + memLoc);
+  }
+
+  /**
+   * Pops the value from the stack into the memory location
+   * 
+   * @param memLoc
+   *            string with format from VM definition e.g (0(D0), #"string",
+   *            etc)
+   */
+  private void pop(String memLoc) {
+    out.println("pop " + memLoc);
+  }
+
+  /**
+   * 
+   * @param src
+   * @param dst
+   */
+  private void move(String src, String dst) {
+    out.println("mov " + src + " " + dst);
+  }
+
+  /**
+   * 
+   * @param src1
+   * @param src2
+   * @param dst
+   */
+  private void add(String src1, String src2, String dst) {
+    out.println("add " + src1 + " " + src2 + " " + dst);
+  }
+
+  /**
+   * 
+   * @param src1
+   * @param src2
+   * @param dst
+   */
+  private void addF(String src1, String src2, String dst) {
+    out.println("addf " + src1 + " " + src2 + " " + dst);
+  }
+
+  /**
+   * 
+   * @param src1
+   * @param src2
+   * @param dst
+   */
+  private void sub(String src1, String src2, String dst) {
+    out.println("sub " + src1 + " " + src2 + " " + dst);
+  }
+
+  /**
+   * 
+   * @param src1
+   * @param src2
+   * @param dst
+   */
+  private void subF(String src1, String src2, String dst) {
+    out.println("subF " + src1 + " " + src2 + " " + dst);
+  }
+
+  /**
+     * 
+     */
+  private void not() {
+    out.println("nots");
+  }
+
+  /**
+     * 
+     */
+  private void and() {
+    out.println("ands");
+  }
+
+  /**
+     * 
+     */
+  private void or() {
+    out.println("ors");
+  }
+
+  private void mulStackI() {
+    out.println("muls");
+  }
+
+  private void divStackI() {
+    out.println("divs");
+  }
+
+  private void modStackI() {
+    out.println("mods");
+  }
+
+  private void mulStackF() {
+    out.println("mulsf");
+  }
+
+  private void divStackF() {
+    out.println("divsf");
+  }
+
+  private void modStackF() {
+    out.println("modsf");
+  }
+
+  private void subStackI() {
+    out.println("subs");
+  }
+
+  private void addStackI() {
+    out.println("adds");
+  }
+
+  private void subStackF() {
+    out.println("subsf");
+  }
+
+  private void addStackF() {
+    out.println("addsf");
+  }
+
+  private void negateStackI() {
+    out.println("negs");
+  }
+
+  private void negateStackF() {
+    out.println("negsf");
+  }
+
+  private void notEqualI() {
+    out.println("cmpnes");
+  }
+
+  private void greaterEqualI() {
+    out.println("cmpges");
+  }
+
+  private void lessEqualI() {
+    out.println("cmples");
+  }
+
+  private void greaterThanI() {
+    out.println("cmpgts");
+  }
+
+  private void lessThanI() {
+    out.println("cmplts");
+  }
+
+  private void equalI() {
+    out.println("cmpeqs");
+  }
+
+  private void notEqualF() {
+    out.println("cmpnesf");
+  }
+
+  private void greaterEqualF() {
+    out.println("cmpgesf");
+  }
+
+  private void lessEqualF() {
+    out.println("cmplesf");
+  }
+
+  private void greaterThanF() {
+    out.println("cmpgtsf");
+  }
+
+  private void lessThanF() {
+    out.println("cmpltsf");
+  }
+
+  private void equalF() {
+    out.println("cmpeqsf");
+  }
+
+  private void castStackToI() {
+    out.println("castsi");
+  }
+
+  private void castStackToF() {
+    out.println("castsf");
+  }
+
+  private void writeStack() {
+    out.println("wrts");
+  }
+
+  private void writelnStack() {
+    out.println("wrtlns");
+  }
+
+  private void writeln() {
+    out.println("wrtln");
+  }
+
+  private void readI(String offset) {
+    out.println("rd " + offset);
+  }
+
+  private void readF(String offset) {
+    out.println("rdf " + offset);
+  }
+
+  private void readS(String offset) {
+    out.println("rds " + offset);
+  }
+
+  /**
+   * Halts program execution
+   */
+  private void halt() {
+    out.println("hlt");
+  }
+
+  private void label(String label) {
+    out.println(label + ":");
+  }
+
+  private void branchTrue(String label) {
+    out.println("brts " + label);
+  }
+
+  private void branchFalse(String label) {
+    out.println("brfs " + label);
+  }
+
+  private void branchUnconditional(String label) {
+    out.println("br " + label);
+  }
+
+  private void ret() {
+    out.println("ret");
+  }
+
+  private void call(String label) {
+    out.println("call " + label);
+  }
+
+  /**
+   * Prints a comment to the VM code (for human readability)
+   * 
+   * @param comment
+   */
+  private void comment(String comment) {
+    out.println("\t; " + comment);
+  }
+
+  /*
+   * VM ASM methods section end
+   */
+
+  public void gen_comment(String comment) {
+    comment(comment);
+  }
+
+  public void gen_label(String label) {
+    label(label);
+  }
+
+  public void gen_activation_rec() {
+
+    SymbolTable tbl = symbolTableStack.getCurrentTable();
+    int nestingLevel = tbl.getNestingLevel();
+    String block = "" + nestingLevel;
+    int variableCount = tbl.getVariableCount();
+    int parameterCount = tbl.getParameterCount();
+    String register = null;
+    String offset = null;
+
+    comment(tbl.getScopeName() + " start"); // ; start
+    add("SP", "#" + variableCount, "SP"); // reserveSpace for the variables
+                        // in the program
+    register = "D" + (tbl.getNestingLevel());
+    if (nestingLevel == 0) {
+      sub("SP", "#" + (variableCount), register);
+    } else {
+      offset = "-" + (variableCount + parameterCount + 2) + "(SP)"; // one
+                                      // slot
+                                      // for
+                                      // return
+                                      // address,
+                                      // one
+                                      // slot
+                                      // for
+                                      // the
+                                      // old
+                                      // register
+                                      // value
+      move(register, offset); // moves the current register into the space
+                  // reserved for the old register
+      sub("SP", "#" + (variableCount + parameterCount + 2), register); // calculates
+                                        // the
+                                        // new
+                                        // register
+                                        // value
+                                        // as
+                                        // the
+                                        // first
+                                        // position
+                                        // in
+                                        // the
+                                        // AR
+
+    }
+    comment("activation end");
+  }
+
+  public void gen_deactivation_rec() {
+    SymbolTable tbl = symbolTableStack.getCurrentTable();
+    int variableCount = tbl.getVariableCount();
+    int parameterCount = tbl.getParameterCount();
+    int nestingLevel = tbl.getNestingLevel();
+    String raOffset = "#" + (parameterCount + 2);
+    String register = "D" + nestingLevel;
+    comment("deactivation start");
+    move("D" + nestingLevel, "SP"); // removes the variables
+    if (nestingLevel == 0) {
+    } else {
+      move("0(SP)", register); // moves the old register value back into
+                    // the register
+      add("SP", raOffset, "SP");
+      ret();
+    }
+    comment(tbl.getScopeName() + " end"); // ; Program1 end
+  }
+
+  public void gen_branch_false(String label) {
+    branchFalse(label);
+  }
+
+  public void gen_cast_op(RecordType r) {
+    if (r == RecordType.FLOAT) {
+      castStackToF();
+    }
+  }
+
+  public void gen_mul_op(TokenType t, RecordType r) {
+    switch (t) {
+    case MP_AND:
+      and();
+      break;
+
+    case MP_MOD:
+      if (r == RecordType.FLOAT) {
+        modStackF();
+      } else {
+        modStackI();
+      }
+      break;
+
+    case MP_FLOAT_DIVIDE:
+      divStackF();
+      break;
+
+    case MP_DIV:
+      divStackI();
+      break;
+
+    case MP_TIMES:
+      if (r == RecordType.FLOAT) {
+        mulStackF();
+      } else {
+        mulStackI();
+      }
+      break;
+
+    default:
+      // semanticError("");
+    }
+  }
+
+  public void gen_add_op(TokenType t, RecordType r) {
+    switch (t) {
+    case MP_OR: // 85 AddingOperator -> mp_or
+      or();
+      break;
+    case MP_MINUS: // 84 AddingOperator -> mp_minus
+      if (r == RecordType.FLOAT) {
+        subStackF();
+      } else {
+        subStackI();
+      }
+      break;
+    case MP_PLUS: // 83 AddingOperator -> mp_plus
+      if (r == RecordType.FLOAT) {
+        addStackF();
+      } else {
+        addStackI();
+      }
+      break;
+    default:
+
+    }
+  }
+
+  public void gen_bool_expr(TokenType t, RecordType r) {
+    switch (t) {
+    case MP_NEQUAL:
+      if (r == RecordType.FLOAT) {
+        notEqualF();
+      } else if (r == RecordType.INTEGER) {
+        notEqualI();
+      }
+      break;
+    case MP_GEQUAL:
+      if (r == RecordType.FLOAT) {
+        greaterEqualF();
+      } else if (r == RecordType.INTEGER) {
+        greaterEqualI();
+      }
+      break;
+    case MP_LEQUAL:
+      if (r == RecordType.FLOAT) {
+        lessEqualF();
+      } else if (r == RecordType.INTEGER) {
+        lessEqualI();
+      }
+      break;
+    case MP_GTHAN:
+      if (r == RecordType.FLOAT) {
+        greaterThanF();
+      } else if (r == RecordType.INTEGER) {
+        greaterThanI();
+      }
+      break;
+    case MP_LTHAN:
+      if (r == RecordType.FLOAT) {
+        lessThanF();
+      } else if (r == RecordType.INTEGER) {
+        lessThanI();
+      }
+      break;
+    case MP_EQUAL:
+      if (r == RecordType.FLOAT) {
+        equalF();
+      } else if (r == RecordType.INTEGER) {
+        equalI();
+      }
+      break;
+    }
+  }
+
+  public void gen_branch_unconditional(String branchLabel) {
+    branchUnconditional(branchLabel);
+  }
+
+  public void gen_call(String label) {
+    call(label);
+  }
+
+  public void gen_not_op() {
+    not();
+  }
+
+  public String getNestingLevelString(int nestingLevel) {
+    return "(D" + Integer.toString(nestingLevel) + ")";
+  }
+
+  public void gen_id_increment(RecordType r, long offset, int nestingLevel) {
+    if (r == RecordType.FLOAT) {
+      addF(Long.toString(offset) + getNestingLevelString(nestingLevel),
+          "#1.0", Long.toString(offset)
+              + getNestingLevelString(nestingLevel));
+    } else if (r == RecordType.INTEGER) {
+      add(Long.toString(offset) + getNestingLevelString(nestingLevel),
+          "#1", Long.toString(offset)
+              + getNestingLevelString(nestingLevel));
+    }
+  }
+
+  public void gen_id_decrement(RecordType r, long offset, int nestingLevel) {
+    if (r == RecordType.FLOAT) {
+      subF(Long.toString(offset) + getNestingLevelString(nestingLevel),
+          "#1.0", Long.toString(offset)
+              + getNestingLevelString(nestingLevel));
+    } else if (r == RecordType.INTEGER) {
+      sub(Long.toString(offset) + getNestingLevelString(nestingLevel),
+          "#1", Long.toString(offset)
+              + getNestingLevelString(nestingLevel));
+    }
+  }
+
+  public void gen_id_push(long offset, int nestingLevel) {
+    push(Long.toString(offset) + getNestingLevelString(nestingLevel));
+  }
+
+  public void gen_id_addr_push(long offset, int nestingLevel) {
+    push("D" + nestingLevel);
+    push("#" + Long.toString(offset));
+    addStackI();
+  }
+
+  public void gen_id_deref_push(long offset, int nestingLevel) {
+    push("@" + Long.toString(offset) + getNestingLevelString(nestingLevel));
+  }
+
+  public void gen_id_pop(long offset, int nestingLevel) {
+    pop(Long.toString(offset) + getNestingLevelString(nestingLevel));
+  }
+
+  public void gen_id_deref_pop(long offset, int nestingLevel) {
+    pop("@" + Long.toString(offset) + getNestingLevelString(nestingLevel));
+  }
+
+  public void gen_lit_push(String value) {
+    push("#" + value);
+  }
+
+  /**
+     * 
+     */
+  public void gen_halt() {
+    halt();
+  }
+
+  public void gen_negate_float() {
+    push("#-1.0");
+    mulStackF();
+  }
+
+  public void gen_negate_int() {
+    push("#-1");
+    mulStackI();
+  }
+
+  public void gen_read_op(RecordType r, long offset, int nestingLevel) {
+    if (r == RecordType.INTEGER) {
+      readI(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    } else if (r == RecordType.FLOAT) {
+      readF(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    } else if (r == RecordType.STRING) {
+      readS(Long.toString(offset) + getNestingLevelString(nestingLevel));
+    }
+  }
+
+  public void gen_sp_increment(int increment) {
+    add("SP", "#" + increment, "SP");
+  }
+
+  public void gen_sp_decrement(int decrement) {
+    sub("SP", "#" + decrement, "SP");
+  }
+
+  public void gen_write_op() {
+    writeStack();
+  }
+
+  public void gen_writeln_op() {
+    writeln();
+  }
+}
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class SemanticRecord {
+    
+    private SRType type;
+    
+    private ArrayList<String> data;
+    
+    public SemanticRecord(SRType type, String... data) {
+        this.type = type;
+        this.data = new ArrayList<>();
+        this.data.addAll(Arrays.asList(data));
+    }
+}
+
+public enum SRType {
+  /**
+   * Data is the classification as String , lexeme (Id Type retrieved from
+   * symboltable)
+   */
+  IDENTIFIER,
+  /**
+   * Data is (Type.Boolean, Type.String, Type.Integer, Type.Float) value on
+   * stack
+   */
+  LITERAL,
+  /**
+   * Data is (MP_NEQUAL, MP_GEQUAL, MP_LEQUAL, MP_GTHAN, MP_LTHAN, MP_EQUAL)
+   */
+  REL_OP,
+  /**
+   * Data is (MP_MINUS, MP_PLUS)
+   */
+  OPT_SIGN,
+  /**
+   * Data is (MP_PLUS, MP_MINUS, MP_OR
+   */
+  ADD_OP,
+  /**
+   * Data is (MP_AND, MP_MOD, MP_DIV, MP_TIMES)
+   */
+  MUL_OP,
+  /**
+   * Data is Current Symbol Table Name, Current Symbol Table Level, Current
+   * Table Size
+   */
+  SYM_TBL,
+  /**
+   * Data is TokenType.MP_WriteLN or TokenType.Write
+   */
+  WRIT_STMT,
+  /**
+   * Data is a label
+   */
+  LABEL,
+
+  FOR_DIRECTION,
+
+  /**
+   * Data is ("function", "procedure", "program")
+   */
+  BLOCK,
+
+  /**
+   * Data is Type enum, Mode enum
+   */
+  FORMAL_PARAM
+}
 </code></pre>
 
 <!-- InstanceEndEditable -->
