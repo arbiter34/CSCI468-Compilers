@@ -37,7 +37,7 @@
   <div id="headMatter">
     <span id="headTitle1">
       <!-- InstanceBeginEditable name="Header" -->
-        Design Pattern
+        Team Team 18
 	  <!-- InstanceEndEditable --> 
     </span>
     <span id="headTitle2">
@@ -51,7 +51,7 @@
 
 <aside id="aside-left">
 <div id="asideLeftTitle">
-Compilers 2014
+Compilers 2015
 </div>
 
 </aside>
@@ -82,50 +82,56 @@ Identify one design pattern that was used in your capstone project and describe 
 <h2>Design Patterns in the Compilers Course</h2>
 <p>The components of the compiler&#8212;the scanner, parser, symbol table, and semantic analyzer&#8212;were each by way of a specific pattern that students were asked to follow. In some cases, students were allowed to deviate from the patterns. As a result, some students may have chosen and/or used different formal design patterns for portions of the compiler. If so, they appear below.</p>
 <h2>Specific Design Patterns</h2>
-<br><br>
-BELOW IS AN EXAMPLE TAKEN FROM A PREVIOUS PROJECT. REPLACE THIS COMMENT AND THEIR WRITEUP WITH YOUR OWN (FOR EXAMPLE, SOME STUDENTS IN CLASS FOLLOWED WHAT WAS ESSENTIALLY THE PRODUCER-CONSUMER PATTERN FOR THE SCANNER-PARSER INTERFACE).
-<BR><BR>
 <p>
-Our team did implement a couple of design patterns. 
-The compiler interface was created to allow the program to swap out target virtual machines, having to rewrite minimal code in the program. 
-This is the Strategy Pattern and also follows a design principle, <i>when possible program to an interface rather than a concrete class</i>. 
+The biggest design pattern that our team implemented was the Abstract Factory Pattern. This allowed us to encapsulate all of our different FSA's since they all share a common theme. In this case, our parent class was AbstractFSA.</i>. 
 </p>
 
 <pre class="prettyprint" ><code class="language-java">
-public interface Compiler {
-	
-	void openFile();
-	void readInt(String dst);
-	void readFloat(String dst);
-	
-	<span class="nocode">...</span>
-	
+public abstract class AbstractFSA {
+    protected BufferedReader inFile;
+    protected TokenContainer t;
+    
+    protected AbstractFSA(){}
+    
+    protected void setBufferedReader(BufferedReader inFile) {
+        this.inFile = inFile;
+    }
+    
+    public final void execute() {
+        if (mark()) {
+            run();
+            reset();
+        }
+    }
+    
+    private boolean mark() {
+        try {
+            inFile.mark(4096);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+    
+    private boolean reset() {
+        try {
+            inFile.reset();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+    
+    public abstract void run();
+    
+    public TokenContainer getResult() {
+        return this.t;
+    }
+    
 }
 </code></pre>
 
-<p>
-The Table class follows the Singleton Pattern. 
-The constructor is private and the root table can only be created once. 
-If it has already been created, then the current root is returned by a call to instantiate the class. 
-Tables created at deeper nesting levels have one reference pointing to their parent table. 
-This creates a linked list structure for the symbol table that is also a singleton, as only one list can exist during runtime.
-</p>
 
-<pre class="prettyprint" ><code class="language-java">
-public class Table {
-
-	private Table(Table parent) {
-		this.parent = parent;
-	}
-	
-	public static Table rootInstance() {
-		return root;
-	}
-	
-	<span class="nocode">...</span>
-	
-}
-</code></pre>
 <!-- InstanceEndEditable -->
 
 </article>
