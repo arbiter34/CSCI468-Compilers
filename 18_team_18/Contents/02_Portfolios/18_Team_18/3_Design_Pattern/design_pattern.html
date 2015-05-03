@@ -83,7 +83,7 @@ Identify one design pattern that was used in your capstone project and describe 
 <p>The components of the compiler&#8212;the scanner, parser, symbol table, and semantic analyzer&#8212;were each by way of a specific pattern that students were asked to follow. In some cases, students were allowed to deviate from the patterns. As a result, some students may have chosen and/or used different formal design patterns for portions of the compiler. If so, they appear below.</p>
 <h2>Specific Design Patterns</h2>
 <p>
-The biggest design pattern that our team implemented was the Abstract Factory Pattern. This allowed us to encapsulate all of our different FSA's since they all share a common theme. In this case, our parent class was AbstractFSA.</i>. 
+The Scanner uses multiple design patterns in our scanner implementation.  The FSA's are accessed and run using a Factory Pattern tightly coupled with a Template Pattern.  Each FSA implements the Singleton pattern to maximize program run-time memory and efficiency.</i>. 
 </p>
 
 <pre class="prettyprint" ><code class="language-java">
