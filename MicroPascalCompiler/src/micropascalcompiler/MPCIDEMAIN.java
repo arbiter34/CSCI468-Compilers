@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 public class MPCIDEMAIN {
 	public static void main(String... args)
 	{
-		String source = "fibonacci.pas";
+		String source = "quiz3.mp";
 		Scanner scanner = new Scanner(source);
         try {
 			Parser parser = new Parser(scanner, new PrintWriter(source+"_parse.txt"), source);
