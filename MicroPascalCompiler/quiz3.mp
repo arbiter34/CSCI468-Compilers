@@ -7,16 +7,20 @@ program test;
 		var
 		a : Integer;
 		begin
-			Read(a);
-					b := a + b * x;
-        	        g := b * g
-	        end;
+			a := 10;
+			b := a + b * x;
+			x := a;
+			g := b * g
+        end;
     begin
-    	Read(a);
-    	Read(b);
-    	Read(g);
+    	a := 5;
+    	b := 6;
+    	g := 5.5;
     	tryit(a, g);
+    	WriteLn('a = ');
     	Write(a);
+    	WriteLn('b = ');
     	Write(b);
+    	WriteLn('g = ');
     	Write(g);
    end.
