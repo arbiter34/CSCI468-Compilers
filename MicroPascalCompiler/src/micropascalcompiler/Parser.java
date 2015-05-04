@@ -1947,7 +1947,7 @@ public class Parser {
 			int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
 
 			match(TokenType.MP_ASSIGN);
-			r = expression(null, null);
+			r = expression(record.getType(), null);
 			if (record.getType() == RecordType.FLOAT && r == RecordType.INTEGER) {
 				analyzer.gen_cast_op(record.getType());
 			} else if (r != record.getType()) {
