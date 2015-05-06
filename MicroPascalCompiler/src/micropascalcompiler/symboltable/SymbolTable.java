@@ -37,6 +37,10 @@ public class SymbolTable {
 		this.parameterCount = 0;
 	}
 
+    public LinkedHashMap<String, SymbolTableRecord> getSymbolTable() {
+        return symbolTable;
+    }
+
 	public void print() {
 		System.out.println("\n\nScope Name    Nesting Level    Label");
 		System.out.println(this.scopeName + "           " + this.nestingLevel

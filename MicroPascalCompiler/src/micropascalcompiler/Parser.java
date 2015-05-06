@@ -941,7 +941,8 @@ public class Parser {
 			r = simpleExpression(previousRecordType, mode);
 
 			printBranch();
-			optionalRelationalPart(r);
+			RecordType bool = optionalRelationalPart(r);
+                        r = bool == null ? r : bool;
 			break;
 		default:
 			syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +");
@@ -952,8 +953,9 @@ public class Parser {
 	/**
      * 
      */
-	public TokenType optionalRelationalPart(RecordType r) {
-		TokenType t = null;
+	public  RecordType optionalRelationalPart(RecordType r) {
+		RecordType rr = null;
+                TokenType t = null;
 		switch (lookAhead.getToken()) {
 		case MP_COMMA:
 		case MP_RPAREN:
@@ -981,11 +983,12 @@ public class Parser {
 			printBranch();
 			simpleExpression(r, null);
 			analyzer.gen_bool_expr(t, r);
+                        rr = RecordType.BOOLEAN;
 			break;
 		default:
 			syntaxError("',', ), downto, to, do, until, else, then, ;, end, <>, >=, <=, >, <, =");
 		}
-		return t;
+		return rr;
 	}
 
 	/**
@@ -1947,7 +1950,7 @@ public class Parser {
 			int nestingLevel = symbolTableStack.getPreviousRecordNestingLevel();
 
 			match(TokenType.MP_ASSIGN);
-			r = expression(record.getType(), null);
+			r = expression(null, null);
 			if (record.getType() == RecordType.FLOAT && r == RecordType.INTEGER) {
 				analyzer.gen_cast_op(record.getType());
 			} else if (r != record.getType()) {

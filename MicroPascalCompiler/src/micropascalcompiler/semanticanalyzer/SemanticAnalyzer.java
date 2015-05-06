@@ -7,6 +7,7 @@ package micropascalcompiler.semanticanalyzer;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
 import micropascalcompiler.symboltable.SymbolTable;
 import micropascalcompiler.symboltable.SymbolTableStack;
 import micropascalcompiler.TokenType;
@@ -351,7 +352,18 @@ public class SemanticAnalyzer {
 																				// AR
 
 		}
+                
 		comment("activation end");
+                comment("init local vars to 0");
+                LinkedHashMap<String, SymbolTableRecord> symbolTable = tbl.getSymbolTable();
+                for (String key : symbolTable.keySet()) {
+			SymbolTableRecord r = symbolTable.get(key);
+                        if (r.getMode() == null) {
+                            push("#0");
+                            pop(r.getOffset() + "(D" + nestingLevel + ")");
+                        }
+		}
+                
 	}
 
 	public void gen_deactivation_rec() {
@@ -528,7 +540,10 @@ public class SemanticAnalyzer {
 							+ getNestingLevelString(nestingLevel));
 		}
 	}
-
+        public void gen_zero_param(long offset, int nestingLevel) {
+            push("#0");
+            pop(Long.toString(offset) + getNestingLevelString(nestingLevel));
+        }
 	public void gen_id_push(long offset, int nestingLevel) {
 		push(Long.toString(offset) + getNestingLevelString(nestingLevel));
 	}
