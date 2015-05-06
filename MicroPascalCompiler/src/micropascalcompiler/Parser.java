@@ -1413,13 +1413,18 @@ public class Parser {
 			}
 
 			r = record.getType();
-
-			if (previousRecordType == RecordType.FLOAT
+                        if (previousRecordType == RecordType.INTEGER
+					&& record.getType() == RecordType.FLOAT) {
+				analyzer.gen_cast_op(record.getType());
+				r = RecordType.FLOAT;
+			} 
+                        else if (previousRecordType == RecordType.FLOAT
 					&& record.getType() == RecordType.INTEGER) {
 				analyzer.gen_cast_op(previousRecordType);
 				r = RecordType.FLOAT;
 			} else if (previousRecordType != null && record.getType() != null
-					&& previousRecordType != record.getType()) {
+					&& previousRecordType != record.getType() 
+                                        && (previousRecordType == RecordType.BOOLEAN || record.getType() == RecordType.BOOLEAN)) {
 				semanticError("Incompatible types " + previousRecordType
 						+ " and " + record.getType() + ".");
 			}
