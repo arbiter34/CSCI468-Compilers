@@ -358,7 +358,7 @@ public class SemanticAnalyzer {
                 LinkedHashMap<String, SymbolTableRecord> symbolTable = tbl.getSymbolTable();
                 for (String key : symbolTable.keySet()) {
 			SymbolTableRecord r = symbolTable.get(key);
-                        if (r.getMode() == null) {
+                        if (r.getMode() == null && r.getKind() == RecordKind.VARIABLE) {
                             push("#0");
                             pop(r.getOffset() + "(D" + nestingLevel + ")");
                         }
