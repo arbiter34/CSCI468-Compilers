@@ -37,7 +37,7 @@
   <div id="headMatter">
     <span id="headTitle1">
       <!-- InstanceBeginEditable name="Header" -->
-        The Team 18
+        Team Team 18
 	  <!-- InstanceEndEditable --> 
     </span>
     <span id="headTitle2">
@@ -75,28 +75,17 @@ Compilers 2015
 <article id="mainContent">
 <!-- InstanceBeginEditable name="Main" -->
 <h1>Design Tradeoffs</h1>
-THIS IS AN EXAMPLE. LIST YOUR OWN DESIGN TRADEOFF. THE RESERVED WORD LOOKUP TABLE IS A GOOD ONE, BUT SO IS THE SYMBOL TABLE. REMOVE THIS LINE.
 
 <h2>Data Structure Tradeoffs</h2>
 
-<h3>Resolution of Keywords</h3>
+<h3>Characters, Symbols, Whitespace</h3>
 <p>
-The &micro;-pascal language has 36 reserved words. 
-We chose to use an array to store these words and simply do a linear search of each token scanned to determine whether or not it is a reserved word. 
-While this is not the most efficient method of searching, it is easy to program, and with only 36 elements in the list, is certainly fast enough. 
-A hash function makes little sense on a data set as small as this because calculating the hash would be expensive as performing a linear search. 
-Another alternative would be to implement a binary tree to reduce the search time to O(log(n)). 
-Again, because the data structure is more complicated than a simple array, the actual time savings would be insignificant to the overall runtime of the program.
+In order to trim down the code when creating our FSA's we created a class Character which has functions to check what a specific character is. If we wanted to know whether a character is a digit we just call the static method Character.isDigit(c) where 'c' is some char. We made this utility class static since there is never a reason for it to be held in a variable. Creating this class also makes our FSA code look much cleaner, improves readability, and makes it much more obvious of what is going on.
 </p>
 
-<h3>Symbol Table Design</h3>
+<h3>Token Container</h3>
 <p>
-Our implementation of the symbol table as a singularly linked list forced our lookup of elements in the table to be O(n). 
-Of course faster search algorithms exist. 
-The symbol table would have to have an additional field representing the nesting level and be a simple list to use a hash table or other data structure that allows faster lookup time. 
-However, this adds some complexity to the search to ensure the variable currently in scope is the variable being referenced. 
-The linked list symbol table with a recursive linear search solves this problem. 
-The actual time difference of faster search algorithms was not sufficient to justify the ease of not only writing the code, but also elegantly solve the problem of variable scope.
+Rather than creating a multitude of lists, hashmaps, or arrays to hold all the information pertaining to a token we created a class TokenContainer which holds all the information about a given token. This class also has getter and setter methods which make it super easy to grab a specific piece of information about a token such as it's type, lexeme etc. and if it is an error, its error number and col / row location. Creating a container for this information keeps all of it organized in the same place, easily accessible, reduces overall code throughout the compiler. 
 </p>
 <!-- InstanceEndEditable -->
 
